@@ -10,7 +10,7 @@
  * alvast ingevuld.
  */
 const FORM_ENDPOINT = "";
-const CONTACT_EMAIL = "knmlnr@gmail.com";
+const CONTACT_EMAIL = "jouw@emailadres.nl";
 
 const form = document.getElementById("signup-form");
 const errorBox = document.getElementById("form-error");

@@ -16,12 +16,12 @@ Bovenaan `script.js` staan twee instellingen:
 
 ```js
 const FORM_ENDPOINT = "";
-const CONTACT_EMAIL = "knmlnr@gmail.com";
+const CONTACT_EMAIL = "jouw@emailadres.nl";
 ```
 
 **Aanbevolen: Formspree.** Maak een gratis account op [formspree.io](https://formspree.io), maak een nieuw formulier aan en kopieer de endpoint-URL (iets als `https://formspree.io/f/abcdwxyz`). Plak die in `FORM_ENDPOINT`. Elke inschrijving komt dan netjes als e-mail binnen, zonder dat de bezoeker zijn mailprogramma nodig heeft.
 
-**Zonder endpoint.** Laat `FORM_ENDPOINT` leeg. Het formulier opent dan het mailprogramma van de bezoeker met alle gegevens alvast ingevuld, gericht aan `CONTACT_EMAIL`. Werkt altijd, maar is iets minder soepel voor de bezoeker.
+**Zonder endpoint.** Laat `FORM_ENDPOINT` leeg. Het formulier opent dan het mailprogramma van de bezoeker met alle gegevens alvast ingevuld, gericht aan `CONTACT_EMAIL` (vul daar je eigen adres in). Werkt altijd, maar is iets minder soepel voor de bezoeker.
 
 ## Online zetten met GitHub Pages
 
