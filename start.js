@@ -117,7 +117,7 @@
     zipBtn.textContent = "Bezig met inpakken...";
     try {
       const map = "wijn-met-mij/";
-      const bestanden = ["index.html", "style.css", "script.js", "start.html", "start.js", "zip.js", "README.md"];
+      const bestanden = ["index.html", "style.css", "script.js", "start.html", "start.js", "zip.js", "beheer.html", "beheer.js", "README.md"];
       const files = [];
       for (const naam of bestanden) {
         files.push({ name: map + naam, text: await fetchText(naam) });

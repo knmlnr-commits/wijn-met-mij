@@ -9,13 +9,27 @@ De site is zo gebouwd dat iedereen er in een minuut een eigen versie van kan mak
 | Bestand | Doel |
 | --- | --- |
 | `index.html` | De uitnodiging zelf, met inschrijfformulier en veelgestelde vragen |
-| `start.html` + `start.js` | Startpagina: vul je gegevens in en krijg je eigen Wijn met mij |
+| `beheer.html` + `beheer.js` | Beheerpagina: je eigen gegevens invullen, live bekijken en opslaan |
+| `start.html` + `start.js` | Startpagina: iemand anders vult zijn gegevens in en krijgt een eigen Wijn met mij |
 | `config.js` | Instellingen van deze site (naam, plaats, e-mailadres, eigen tekst) |
 | `script.js` | Personaliseert de pagina en verstuurt inschrijvingen |
 | `style.css` | Vormgeving |
 | `zip.js` | Kleine ZIP-schrijver voor de download op de startpagina |
 
 Geen bouwstap, geen afhankelijkheden. Open `index.html` in een browser en het werkt.
+
+## Je site instellen via de beheerpagina
+
+Open `beheer.html` (bijvoorbeeld `https://<gebruikersnaam>.github.io/wijn-met-mij/beheer.html`). Je vult je voornaam, stad, e-mailadres en eventueel een eigen tekst in, en ziet rechts direct hoe de site eruitziet.
+
+Met **Opslaan op de site** wordt `config.js` in de repository bijgewerkt en zet GitHub Pages de nieuwe instellingen binnen een minuut live. Daarvoor is eenmalig een toegangssleutel nodig:
+
+1. Ga naar [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new).
+2. Kies bij *Repository access* voor *Only select repositories* en selecteer deze repository.
+3. Zet bij *Repository permissions* het onderdeel *Contents* op *Read and write*. Meer is niet nodig.
+4. Plak de sleutel op de beheerpagina onder *GitHub-koppeling*. Vink *Sleutel onthouden* aan als je hem niet elke keer wilt invoeren; hij blijft dan alleen in je eigen browser staan.
+
+Liever geen sleutel? Met **Download config.js** krijg je het bestand en zet je het zelf in de repository.
 
 ## Inschrijvingen ontvangen
 
