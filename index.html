@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wijn met mij</title>
-  <meta name="description" content="Schrijf je in om samen een fles wijn te drinken en elkaar te leren kennen. Ik betaal, jij hoeft alleen te komen.">
+  <meta name="description" content="Een open uitnodiging: schrijf je in om samen een fles wijn te drinken, een leuke avond te hebben en elkaar te leren kennen.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍷</text></svg>">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -12,10 +12,10 @@
 
   <header class="hero">
     <div class="container hero-inner">
-      <p class="eyebrow">Een uitnodiging</p>
+      <p class="eyebrow" id="eyebrow">Een open uitnodiging</p>
       <h1>Wijn met mij</h1>
       <p class="lead">
-        Ik ben nieuwsgierig naar andere mensen. Daarom nodig ik je uit om samen een fles wijn te drinken en elkaar gewoon te leren kennen. Ik betaal, ik hoef niets, jij hoeft alleen te komen.
+        Ik ben nieuwsgierig naar andere mensen. Daarom nodig ik je uit voor een fles wijn, een goed gesprek en gewoon een leuke avond. Geen agenda, geen verwachtingen; alleen twee mensen die elkaar nog niet kennen.
       </p>
       <a href="#inschrijven" class="btn btn-primary">Ik doe mee</a>
     </div>
@@ -26,12 +26,14 @@
     <section class="section" id="waarom">
       <div class="container narrow">
         <h2>Waarom eigenlijk?</h2>
-        <p>
-          Geen verkooppraatje, geen netwerkbijeenkomst, geen verborgen agenda. Ik vind mensen interessant; hun verhalen, hun werk, waar ze wakker van liggen en waar ze blij van worden. Een goed gesprek met een onbekende is een van de fijnste dingen die er zijn, en het gebeurt veel te weinig.
-        </p>
-        <p>
-          Dus dit is het idee: jij en ik, een tafel, een fles wijn (of iets anders als je geen wijn drinkt) en een paar uur de tijd. Meer niet.
-        </p>
+        <div id="waarom-tekst">
+          <p>
+            Geen verkooppraatje, geen netwerkbijeenkomst, geen verborgen agenda. Ik vind mensen interessant; hun verhalen, hun werk, waar ze wakker van liggen en waar ze blij van worden. Een goed gesprek met een onbekende is een van de fijnste dingen die er zijn, en het gebeurt veel te weinig.
+          </p>
+          <p>
+            Dus dit is het idee: jij en ik, een tafel, een fles wijn (of iets anders als je geen wijn drinkt) en een paar uur de tijd. Meer niet.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -51,8 +53,8 @@
           </article>
           <article class="step">
             <span class="step-nr">3</span>
-            <h3>We drinken een fles wijn</h3>
-            <p>Ergens in een café of restaurant. Ik betaal de rekening; jij brengt alleen jezelf mee.</p>
+            <h3>We hebben een leuke avond</h3>
+            <p id="stap3-tekst">Ergens in een café, wijnbar of restaurant. Een fles wijn op tafel, en verder zien we wel waar het gesprek heen gaat.</p>
           </article>
         </div>
       </div>
@@ -62,10 +64,10 @@
       <div class="container narrow">
         <h2>De spelregels</h2>
         <ul class="rules">
-          <li><strong>Ik betaal.</strong> De wijn, de hapjes, alles. Daar hoef je niets voor terug te doen.</li>
           <li><strong>Geen verplichtingen.</strong> Je hoeft niets te kopen, nergens lid van te worden en geen vervolgafspraak te maken.</li>
           <li><strong>Iedereen is welkom.</strong> Jong of oud, wijnkenner of niet. Nieuwsgierigheid is het enige wat je nodig hebt.</li>
           <li><strong>Geen wijn? Geen probleem.</strong> Een pot thee, een biertje of een goede koffie doet het ook.</li>
+          <li><strong>Gewoon gezellig.</strong> Het gaat om het gesprek en de avond, niet om wat eruit moet komen.</li>
           <li><strong>Je gegevens blijven bij mij.</strong> Ik gebruik je naam en e-mailadres alleen om een afspraak te maken. Niets wordt gedeeld of doorverkocht.</li>
         </ul>
       </div>
@@ -157,13 +159,13 @@
         </details>
 
         <details>
-          <summary>Wat kost het mij?</summary>
-          <p>Helemaal niets. Ik betaal de wijn en wat erbij komt. Het enige wat je investeert is een paar uur van je tijd.</p>
+          <summary>Wie betaalt de wijn?</summary>
+          <p>Daar doen we niet moeilijk over. De eerste fles is van mij; verder zien we wel.</p>
         </details>
 
         <details>
           <summary>Waar spreken we af?</summary>
-          <p>Op een openbare plek, zoals een café, wijnbar of restaurant. We kiezen samen iets dat voor ons allebei goed bereikbaar is.</p>
+          <p id="faq-waar">Op een openbare plek, zoals een café, wijnbar of restaurant. We kiezen samen iets dat voor ons allebei goed bereikbaar is.</p>
         </details>
 
         <details>
@@ -182,11 +184,13 @@
 
   <footer class="footer">
     <div class="container">
-      <p>Wijn met mij. Een persoonlijk initiatief, zonder bijbedoelingen. Proost.</p>
+      <p id="footer-tekst">Wijn met mij. Een persoonlijk initiatief, zonder bijbedoelingen. Proost.</p>
       <p class="small">Drink met mate. Alleen voor 18 jaar en ouder.</p>
+      <p class="small"><a href="start.html">Zelf een Wijn met mij starten?</a></p>
     </div>
   </footer>
 
+  <script src="config.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

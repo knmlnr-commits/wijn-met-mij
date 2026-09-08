@@ -1,27 +1,36 @@
 # Wijn met mij
 
-Een eenvoudige website waar mensen zich kunnen inschrijven om samen een fles wijn te drinken en elkaar te leren kennen. Ik betaal, er zijn geen verplichtingen; ik ben gewoon nieuwsgierig naar andere mensen.
+Een open uitnodiging voor een leuke avond: mensen schrijven zich in om samen een fles wijn te drinken en elkaar te leren kennen. Geen agenda, geen verwachtingen.
+
+De site is zo gebouwd dat iedereen er in een minuut een eigen versie van kan maken.
 
 ## Wat zit erin
 
-- `index.html`: de pagina zelf (uitnodiging, spelregels, inschrijfformulier, veelgestelde vragen)
-- `style.css`: de vormgeving
-- `script.js`: het versturen van inschrijvingen
+| Bestand | Doel |
+| --- | --- |
+| `index.html` | De uitnodiging zelf, met inschrijfformulier en veelgestelde vragen |
+| `start.html` + `start.js` | Startpagina: vul je gegevens in en krijg je eigen Wijn met mij |
+| `config.js` | Instellingen van deze site (naam, plaats, e-mailadres, eigen tekst) |
+| `script.js` | Personaliseert de pagina en verstuurt inschrijvingen |
+| `style.css` | Vormgeving |
+| `zip.js` | Kleine ZIP-schrijver voor de download op de startpagina |
 
 Geen bouwstap, geen afhankelijkheden. Open `index.html` in een browser en het werkt.
 
 ## Inschrijvingen ontvangen
 
-Bovenaan `script.js` staan twee instellingen:
+Inschrijvingen gaan via [FormSubmit](https://formsubmit.co) rechtstreeks naar het e-mailadres in `config.js`. Daar hoef je geen account voor aan te maken. Bij de eerste inschrijving stuurt FormSubmit een activatiemail naar dat adres; bevestig die één keer en daarna komen alle berichten gewoon binnen.
 
-```js
-const FORM_ENDPOINT = "";
-const CONTACT_EMAIL = "jouw@emailadres.nl";
-```
+Lukt het versturen onverhoopt niet, dan opent het mailprogramma van de bezoeker met alle gegevens alvast ingevuld.
 
-**Aanbevolen: Formspree.** Maak een gratis account op [formspree.io](https://formspree.io), maak een nieuw formulier aan en kopieer de endpoint-URL (iets als `https://formspree.io/f/abcdwxyz`). Plak die in `FORM_ENDPOINT`. Elke inschrijving komt dan netjes als e-mail binnen, zonder dat de bezoeker zijn mailprogramma nodig heeft.
+## Je eigen Wijn met mij starten
 
-**Zonder endpoint.** Laat `FORM_ENDPOINT` leeg. Het formulier opent dan het mailprogramma van de bezoeker met alle gegevens alvast ingevuld, gericht aan `CONTACT_EMAIL` (vul daar je eigen adres in). Werkt altijd, maar is iets minder soepel voor de bezoeker.
+Ga naar `start.html`, vul je voornaam, stad, e-mailadres en eventueel een eigen tekst in. Je krijgt dan:
+
+1. **Een link.** Je gegevens zitten in de link zelf (achter het hekje), dus er wordt niets op een server opgeslagen. De link werkt direct en kun je meteen delen.
+2. **Een ZIP-bestand.** Alle bestanden met jouw gegevens al ingevuld in `config.js`. Zet de inhoud op een webhost naar keuze en je site draait los van deze.
+
+Handmatig aanpassen kan ook: verander de waarden in `config.js`.
 
 ## Online zetten met GitHub Pages
 
@@ -34,6 +43,6 @@ Een eigen domeinnaam koppelen kan op dezelfde pagina onder *Custom domain*.
 
 ## Aanpassen
 
-- Teksten staan allemaal in `index.html`; pas ze gerust aan naar je eigen toon.
+- Teksten staan in `index.html`; pas ze gerust aan naar je eigen toon.
 - Kleuren staan bovenaan `style.css` in de `:root`-variabelen.
-- Formuliervelden toevoegen? Voeg een veld toe in `index.html` en neem het mee in `collectData` en `buildMessage` in `script.js`.
+- Formuliervelden toevoegen? Voeg een veld toe in `index.html` en neem het mee in `collectData`, `sendViaFormSubmit` en `buildMessage` in `script.js`.
