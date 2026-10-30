@@ -26,3 +26,8 @@ needed to run the sandbox, a demo value is used and marked.
 | 12 | RAG colours: red, amber and green are not brand colours | Functional status colours, always shown with a text label | Brand owner |
 | 13 | Bank holidays outside the range of the gov.uk feed (the feed covers a limited number of years ahead) | Dates outside the loaded range are treated as normal business days; the Framework page will show the loaded range | Platform team |
 | 14 | FOS contact details (name, address, phone, website) | To be held as an editable firm setting, not a code constant | Compliance |
+| 15 | Acknowledgement once resolved: if a complaint is summary resolved, or gets a final response, before an acknowledgement is sent | No acknowledgement is required any more, so no acknowledgement breach; a late acknowledgement is recorded (`acknowledgementLate`) for MI but is not red | Compliance |
+| 16 | Holding response wording at eight weeks: DISP 1.6 requires the delay response, with FOS rights, by the end of eight weeks | The engine flags `holdingRequiresFosRights` from the deadline day itself (build 38a7212 only added FOS wording the day after) | Compliance |
+| 17 | Retention for a complaint received on 29 February | Rolls forward to 1 March, so retention is never shortened | Compliance |
+| 18 | Closing a complaint without a final response or summary resolution (for example withdrawn) | Not yet decided; the clock would show red after the deadline. To settle in phase 4 | W&C |
+| 19 | The gov.uk bank holiday feed is blocked from the build container | Rules tests use fixed 2026 fixture dates; the seed script fetches the live feed wherever it runs (laptop, CI or the sandbox) | Platform team |
