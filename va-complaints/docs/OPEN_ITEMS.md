@@ -31,3 +31,9 @@ needed to run the sandbox, a demo value is used and marked.
 | 17 | Retention for a complaint received on 29 February | Rolls forward to 1 March, so retention is never shortened | Compliance |
 | 18 | Closing a complaint without a final response or summary resolution (for example withdrawn) | Not yet decided; the clock would show red after the deadline. To settle in phase 4 | W&C |
 | 19 | The gov.uk bank holiday feed is blocked from the build container | Rules tests use fixed 2026 fixture dates; the seed script fetches the live feed wherever it runs (laptop, CI or the sandbox) | Platform team |
+| 20 | Referral to the FOS before a final response: DISP lets a complainant refer once eight weeks have passed without a final response; the build prompt allows referral only after a final response | Built as the prompt says (`refer_to_fos` needs a final response) | Compliance |
+| 21 | Changing the insurer (complaint type) after registration | Not editable, because it moves the regulatory clock; a wrongly classified complaint is soft deleted and registered again | W&C |
+| 22 | Vulnerability: with `ref_vulnerability_category` empty, a complaint cannot be saved as vulnerable (the category is required when yes) | Strict rule kept; supplying the W&C coding (item 1) unblocks it. Urgent before real use | W&C |
+| 23 | Firm name and short name used in letters and "upheld against" | Seeded as "Van Ameyde" for both | W&C |
+| 24 | Hard delete when neither the insurer nor the firm settings hold a retention period | Blocked, so a record is never purged on an assumed period; all seeded insurers have one | Compliance |
+| 25 | Who may see soft deleted complaints | Manager and Compliance; hidden from handlers | Compliance |

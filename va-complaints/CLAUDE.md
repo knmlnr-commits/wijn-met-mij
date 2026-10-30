@@ -27,8 +27,17 @@ for behaviour only, never port its code.
 - `lib/rules/`: the rules engine. Pure TypeScript, no framework, database or I/O imports.
   All timeline maths, eligibility checks and RAG status go through it. Regulatory constants
   exist only in `lib/rules/constants.ts`; never repeat a regulatory number elsewhere.
-- `lib/db/`: repository layer (phase 2).
-- `supabase/migrations/`: schema, RLS, audit trigger, one Postgres function per workflow action.
+- `lib/domain/`: status, outcome and other codes shared by validation, data layer and UI.
+- `lib/validation/`: zod schemas for every server action input.
+- `lib/db/`: repository layer, the only code that talks to Supabase. `createUserClient()` runs
+  as the signed in user under RLS; `createServiceClient()` (service role) is for admin tasks
+  without a user session only. Database errors go through `toDataError` so constraint details
+  (which can hold personal data) never reach the UI or logs.
+- `lib/auth/`: `requireRole(...)` for every server action and route handler.
+- `supabase/migrations/`: schema, RLS (default deny), audit trigger, one Postgres function per
+  workflow action. `app.current_user_id()` is the only reference to Supabase Auth in SQL.
+- `supabase/tests/auth-shim.sql`: test only stand in for Supabase Auth on plain Postgres.
+- `scripts/`: seed scripts (bank holidays from gov.uk, demo users and 25 synthetic complaints).
 - `docs/OPEN_ITEMS.md`: every `TODO(CONFIRM)`.
 
 ## Rules for every change
@@ -42,7 +51,13 @@ for behaviour only, never port its code.
 4. Enforce roles server side in every server action and route handler (`requireRole`), not
    only in the UI. Validate every input with zod. No personal data in logs or error messages.
 5. Every workflow action and edit writes a `complaint_events` row in the same transaction.
+   Complaints, events and notifications have no direct write grant; change them only through
+   a workflow function in `supabase/migrations`. Rules that depend on the regulatory clock
+   (summary eligibility, deadlines) are checked with the rules engine in the server action;
+   the database enforces roles, state and the audit trail.
 6. The Supabase service role key is used only in server code and seed scripts.
+7. Never edit an applied migration; add a new one. Keep `EDITABLE_FIELDS` in
+   `lib/domain/complaint.ts` and `app.editable_complaint_fields()` in step (a test checks).
 
 ## House style (enforced by `tests/house-style.test.ts`)
 
@@ -61,6 +76,8 @@ for behaviour only, never port its code.
 ```bash
 npm run dev        # local app
 npm run check      # typecheck, lint, unit and house style tests
+TEST_DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/postgres npm run test
+                   # adds the database tests: migrations, RLS per role, workflow functions
 npm run build      # production build
 npm run test:e2e   # Playwright smoke (set PLAYWRIGHT_CHROMIUM_PATH to use a preinstalled Chromium)
 ```

@@ -10,7 +10,7 @@ const FORBIDDEN = new RegExp("[\\u2013\\u2014]");
 const ROOT = join(__dirname, "..");
 const SCAN_DIRS = ["app", "components", "lib", "supabase", "scripts", "docs", "tests", "e2e"];
 const SCAN_FILES = ["README.md", "CLAUDE.md", ".env.example"];
-const EXTENSIONS = new Set([".ts", ".tsx", ".css", ".sql", ".md", ".json", ".csv", ".txt", ".html"]);
+const EXTENSIONS = new Set([".ts", ".tsx", ".css", ".sql", ".md", ".json", ".csv", ".txt", ".html", ".toml"]);
 
 function walk(dir: string): string[] {
   let entries: string[];
