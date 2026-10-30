@@ -1,0 +1,162 @@
+/*
+ * Van Ameyde house style. Brand colours only (brand.vanameyde.com/guidelines/colours),
+ * plus white and neutral greys for surfaces and borders.
+ * Fonts: Georgia for headers, Verdana for body. No web font downloads.
+ */
+:root {
+  --va-navy: #07017e;
+  --va-turquoise: #00d8b9;
+  --va-misty-rose: #e5d3d1;
+  --va-white: #ffffff;
+
+  --grey-50: #f6f6f8;
+  --grey-100: #ececf0;
+  --grey-300: #d4d4dc;
+  --grey-500: #8a8a96;
+  --grey-700: #4e4e5a;
+  --grey-900: #22222a;
+
+  /* Functional RAG colours; TODO(CONFIRM) see docs/OPEN_ITEMS.md. Always paired with a text label. */
+  --rag-red: #b3261e;
+  --rag-amber: #b86e00;
+  --rag-green: #1b7a45;
+
+  --surface: var(--va-white);
+  --background: var(--grey-50);
+  --border: var(--grey-300);
+  --text: var(--grey-900);
+  --text-muted: var(--grey-700);
+  --accent: var(--va-turquoise);
+
+  --font-heading: Georgia, "Times New Roman", serif;
+  --font-body: Verdana, Geneva, sans-serif;
+
+  --radius: 6px;
+  --shadow: 0 1px 3px rgba(7, 1, 126, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--background);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  color: var(--va-navy);
+  margin: 0 0 0.5em;
+}
+
+h1 {
+  font-size: 1.7rem;
+}
+
+h2 {
+  font-size: 1.3rem;
+}
+
+h3 {
+  font-size: 1.05rem;
+}
+
+a {
+  color: var(--va-navy);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.app-header {
+  background: var(--va-navy);
+  color: var(--va-white);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 60px;
+  padding: 0 24px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  height: 38px;
+  width: 38px;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.brand-firm {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+}
+
+.brand-subtitle {
+  font-size: 0.75rem;
+  color: var(--va-turquoise);
+}
+
+.version-chip {
+  border: 1px solid var(--va-turquoise);
+  border-radius: 999px;
+  color: var(--va-white);
+  font-size: 0.7rem;
+  padding: 2px 10px;
+  white-space: nowrap;
+}
+
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+@media (max-width: 640px) {
+  .app-header {
+    padding: 0 16px;
+  }
+
+  .brand-subtitle {
+    display: none;
+  }
+
+  .content {
+    padding: 16px;
+  }
+}
