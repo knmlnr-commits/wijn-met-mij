@@ -125,3 +125,10 @@ export function profileWarnings(profile: SlaProfile): ProfileWarning[] {
   }
   return warnings;
 }
+
+/**
+ * PS25/19 Unified Complaints Return: from 01-07-2026, entity level, due within 30 business days
+ * of the end of the reporting period.
+ */
+export const UCR_START_DATE = "2026-07-01";
+export const UCR_DUE_BUSINESS_DAYS = 30;

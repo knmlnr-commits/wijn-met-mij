@@ -4,7 +4,7 @@
  */
 import type { ClientBase } from "pg";
 import type { IsoDate } from "@/lib/rules";
-import type { BankHolidaySeed } from "./bank-holidays";
+import type { BankHolidaySeed } from "@/lib/holidays/govuk";
 import { generateDemoComplaints } from "./demo-data";
 
 export interface DemoUsers {

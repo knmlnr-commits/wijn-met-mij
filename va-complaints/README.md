@@ -4,8 +4,8 @@ Internal tool for complaint handlers to register, investigate, track and resolve
 complaints within the UK FCA DISP timeline and the Lloyd's complaints procedure.
 
 Status: release candidate in progress. Done: phase 0 (scaffold), phase 1 (rules engine,
-`lib/rules`), phase 2 (database, RLS, workflow functions, seed) and phase 3 (authentication).
-Screens, letters and handover follow. See `CLAUDE.md` for conventions and
+`lib/rules`), phase 2 (database, RLS, workflow functions, seed), phase 3 (authentication) and
+phase 4 (workflow and screens). Letters and handover follow. See `CLAUDE.md` for conventions and
 `docs/OPEN_ITEMS.md` for items awaiting confirmation.
 
 ## Local setup

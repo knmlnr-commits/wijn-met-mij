@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { ROLE_LABELS } from "@/lib/auth/roles";
+import { HelpPanel } from "@/components/HelpPanel";
+import { Nav, type NavLinkItem } from "@/components/Nav";
+import { can, ROLE_LABELS } from "@/lib/auth/roles";
+import type { Role } from "@/lib/domain/complaint";
 import { getSessionState } from "@/lib/auth/session";
 import { appVersion } from "@/lib/version";
 import "./globals.css";
@@ -10,6 +13,16 @@ export const metadata: Metadata = {
   description: "Internal complaints handling within the FCA DISP timeline.",
   robots: { index: false, follow: false },
 };
+
+function linksFor(role: Role): NavLinkItem[] {
+  return [
+    { href: "/", label: "Dashboard" },
+    ...(can.writeComplaints(role) ? [{ href: "/register", label: "Register" }] : []),
+    { href: "/reports", label: "Reports" },
+    ...(can.manage(role) ? [{ href: "/settings", label: "Settings" }] : []),
+    { href: "/framework", label: "Framework" },
+  ];
+}
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const { sha, env } = appVersion();
@@ -48,7 +61,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             )}
           </div>
         </header>
+        {user && <Nav links={linksFor(user.role)} />}
         <main className="content">{children}</main>
+        {user && <HelpPanel />}
       </body>
     </html>
   );

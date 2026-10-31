@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseGovUkBankHolidays } from "@/scripts/lib/bank-holidays";
+import { parseGovUkBankHolidays } from "@/lib/holidays/govuk";
 
 // Same shape as https://www.gov.uk/bank-holidays.json, trimmed to two events per division.
 const FEED = {

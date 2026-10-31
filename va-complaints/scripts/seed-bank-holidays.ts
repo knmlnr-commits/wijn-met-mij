@@ -3,7 +3,7 @@
  * Usage: SUPABASE_DB_URL=postgresql://... npm run seed:holidays
  */
 import { Client } from "pg";
-import { GOV_UK_BANK_HOLIDAYS_URL, parseGovUkBankHolidays } from "./lib/bank-holidays";
+import { GOV_UK_BANK_HOLIDAYS_URL, parseGovUkBankHolidays } from "@/lib/holidays/govuk";
 import { upsertBankHolidays } from "./lib/seed-db";
 
 async function main() {

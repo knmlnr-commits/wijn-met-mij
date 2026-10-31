@@ -211,3 +211,285 @@ textarea {
     padding: 16px;
   }
 }
+
+/* ---------- Shared components ---------- */
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.page-header h1 {
+  margin: 0;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.small {
+  font-size: 0.8rem;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.grid-2 {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-3 {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.button-primary {
+  background: var(--va-navy);
+  border: 1px solid var(--va-navy);
+  border-radius: var(--radius);
+  color: var(--va-white);
+  cursor: pointer;
+  padding: 10px 16px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.button-primary:disabled,
+.button-secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.button-primary:focus-visible {
+  outline: 3px solid var(--va-turquoise);
+  outline-offset: 1px;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+table.data {
+  border-collapse: collapse;
+  min-width: 100%;
+  font-size: 0.85rem;
+}
+
+table.data th,
+table.data td {
+  border-bottom: 1px solid var(--grey-100);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+table.data th {
+  background: var(--grey-50);
+  color: var(--va-navy);
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+table.data td.wrap {
+  white-space: normal;
+  min-width: 220px;
+}
+
+table.data tr:last-child td {
+  border-bottom: none;
+}
+
+.num {
+  text-align: right;
+}
+
+.rag {
+  border-radius: 999px;
+  color: var(--va-white);
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 10px;
+}
+
+.rag-red {
+  background: var(--rag-red);
+}
+
+.rag-amber {
+  background: var(--rag-amber);
+}
+
+.rag-green {
+  background: var(--rag-green);
+}
+
+.badge {
+  background: var(--grey-100);
+  border-radius: 999px;
+  color: var(--grey-900);
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 2px 10px;
+}
+
+.badge-rose {
+  background: var(--va-misty-rose);
+}
+
+.notice {
+  background: var(--grey-100);
+  border-left: 4px solid var(--va-turquoise);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+}
+
+.notice-warn {
+  background: var(--va-misty-rose);
+  border-left-color: var(--va-navy);
+}
+
+.form-grid {
+  display: grid;
+  gap: 12px 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-grid .full {
+  grid-column: 1 / -1;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field label,
+.field legend {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.field input,
+.field select,
+.field textarea {
+  background: var(--va-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 9px 10px;
+  width: 100%;
+}
+
+.field textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible {
+  outline: 3px solid var(--va-turquoise);
+  outline-offset: 1px;
+}
+
+.field-error {
+  color: var(--rag-red);
+  font-size: 0.8rem;
+}
+
+.field fieldset {
+  border: none;
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+.check {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.form-message {
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  margin: 0;
+  padding: 10px 12px;
+}
+
+.form-message.ok {
+  background: var(--grey-100);
+}
+
+.form-message.error {
+  background: var(--va-misty-rose);
+}
+
+dl.meta {
+  display: grid;
+  gap: 6px 16px;
+  grid-template-columns: minmax(140px, max-content) 1fr;
+  margin: 0;
+}
+
+dl.meta dt {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+dl.meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-2,
+  .grid-3,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .button-primary,
+  .button-secondary,
+  .button-row > * {
+    width: 100%;
+  }
+
+  dl.meta {
+    grid-template-columns: 1fr;
+  }
+
+  dl.meta dd {
+    margin-bottom: 6px;
+  }
+}

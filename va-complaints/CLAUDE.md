@@ -33,6 +33,12 @@ for behaviour only, never port its code.
   as the signed in user under RLS; `createServiceClient()` (service role) is for admin tasks
   without a user session only. Database errors go through `toDataError` so constraint details
   (which can hold personal data) never reach the UI or logs.
+- `lib/complaints/`: view models (timeline per complaint, KPIs, filters, risk sort) and the
+  action policy (`availableActions`: which actions are possible and why not). Server actions
+  call `assertActionAllowed` before any write.
+- `lib/reports/`: DISP 1.10 MI and CSV (formula injection safe).
+- `app/`: screens. Server actions live next to their pages (`app/complaints/actions.ts`,
+  `app/settings/actions.ts`); every one runs requireRole, zod and the policy, then a repo call.
 - `lib/auth/`: `requireRole(...)` for every server action and route handler;
   `requirePageUser(...)` for pages. `proxy.ts` (Next 16's renamed middleware) only refreshes
   the session and sends visitors without one to `/login`; roles come from `profiles` only.

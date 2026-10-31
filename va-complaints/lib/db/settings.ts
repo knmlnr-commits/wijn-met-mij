@@ -90,3 +90,14 @@ export async function saveProfile(
   const result = await db.from("profiles").upsert({ id, ...input }, { onConflict: "id" }).select("id");
   if ((check(result) as unknown[]).length !== 1) throw new DataError("You do not have permission to do this.", "forbidden");
 }
+
+export async function upsertBankHolidays(db: Db, rows: BankHolidayRow[]): Promise<number> {
+  if (rows.length === 0) return 0;
+  const result = await db.from("bank_holidays").upsert(rows, { onConflict: "region,date" }).select("date");
+  return (check(result) as unknown[]).length;
+}
+
+export async function deleteBankHoliday(db: Db, region: string, date: string): Promise<void> {
+  const deleted = check(await db.from("bank_holidays").delete().eq("region", region).eq("date", date).select("date")) as unknown[];
+  if (deleted.length !== 1) throw new DataError("You do not have permission to do this.", "forbidden");
+}
