@@ -40,4 +40,6 @@ needed to run the sandbox, a demo value is used and marked.
 | 26 | Keep password and email link sign in as a fallback once Microsoft Entra ID is live | Both stay available until decided; switching Entra on does not remove them | Emanuel Rita |
 | 27 | Entra app registration (tenant, client secret owner and expiry, user assignment) | Documented in `docs/ENTRA_SETUP.md`; not configured | VAS platform team |
 | 28 | Email delivery for sign in links in the sandbox: Supabase's built in mailer is rate limited and meant for testing | Fine for a handful of invited users; a custom SMTP sender is needed before wider use (ties in with item 8) | VAS platform team |
-| 29 | Notification drafts on workflow actions (acknowledgement, holding, summary resolution, final response) | Actions record the step and the audit event now; letter drafts are added in phase 5 | Build |
+| 29 | Letter wording beyond the referral paragraphs (greeting, body sentences, sign off) | Plain English written for the sandbox in `lib/letters/templates.ts`; W&C to review against spec section 4 and their house letters | W&C |
+| 30 | Letters cannot be sent while the FOS (or Lloyd's) wording is empty | Drafts show a marked placeholder and sending is blocked, so no letter leaves without referral rights; supplying the spec unblocks it | Koen Molenaar |
+| 31 | The sandbox data was seeded through SQL (the sandbox has no service role key in this build environment) | Demo users created directly in auth.users; `npm run seed:demo` remains the supported path | Platform team |

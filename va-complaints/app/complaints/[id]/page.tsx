@@ -16,6 +16,7 @@ import { formatDate, formatDateTime, formatGBP } from "@/lib/format";
 import { todayUtc } from "@/lib/rules";
 import { ActionsPanel } from "./ActionsPanel";
 import { EditDetails } from "./EditDetails";
+import { NotificationsPanel } from "./NotificationsPanel";
 import styles from "./detail.module.css";
 
 export const metadata: Metadata = { title: "Complaint | Van Ameyde Complaints Management" };
@@ -101,37 +102,7 @@ export default async function ComplaintPage({ params }: { params: Promise<{ id: 
         </details>
       )}
 
-      <section className="card stack" aria-labelledby="notifications-heading">
-        <h2 id="notifications-heading">Notifications</h2>
-        {notifications.length === 0 ? (
-          <p className="muted">No customer communications yet.</p>
-        ) : (
-          <div className="table-wrap">
-            <table className="data">
-              <thead>
-                <tr>
-                  <th scope="col">Created</th>
-                  <th scope="col">Type</th>
-                  <th scope="col">Channel</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Sent</th>
-                </tr>
-              </thead>
-              <tbody>
-                {notifications.map((n) => (
-                  <tr key={n.id}>
-                    <td>{formatDateTime(n.created_at)}</td>
-                    <td>{n.type.replace("_", " ")}</td>
-                    <td>{n.channel}</td>
-                    <td>{n.status}</td>
-                    <td>{n.sent_at ? formatDateTime(n.sent_at) : "Not sent"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+      <NotificationsPanel complaintId={complaint.id} notifications={notifications} canWrite={editable && user.role !== "compliance"} />
 
       <section className="card stack" aria-labelledby="audit-heading">
         <h2 id="audit-heading">Audit trail</h2>

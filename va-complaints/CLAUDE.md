@@ -37,6 +37,10 @@ for behaviour only, never port its code.
   action policy (`availableActions`: which actions are possible and why not). Server actions
   call `assertActionAllowed` before any write.
 - `lib/reports/`: DISP 1.10 MI and CSV (formula injection safe).
+- `lib/letters/`: the four letter templates (pure), referral wording from firm settings (FOS;
+  Lloyd's then FOS for Lloyd's insurers). Missing wording renders as a `[[ ]]` placeholder and
+  blocks sending. `lib/email/`: `EmailProvider` (stub by default; no content or full address
+  in logs).
 - `app/`: screens. Server actions live next to their pages (`app/complaints/actions.ts`,
   `app/settings/actions.ts`); every one runs requireRole, zod and the policy, then a repo call.
 - `lib/auth/`: `requireRole(...)` for every server action and route handler;

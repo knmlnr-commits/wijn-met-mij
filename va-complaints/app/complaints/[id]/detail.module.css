@@ -111,3 +111,23 @@
     grid-template-columns: 1fr;
   }
 }
+
+.letter {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  min-height: 360px;
+}
+
+.letterView {
+  background: var(--grey-50);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0;
+  max-height: 480px;
+  overflow: auto;
+  padding: 12px;
+  white-space: pre-wrap;
+}

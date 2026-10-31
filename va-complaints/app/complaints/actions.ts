@@ -10,7 +10,8 @@ import { buildView } from "@/lib/complaints/view";
 import { createUserClient, type Db } from "@/lib/db/client";
 import * as repo from "@/lib/db/complaints";
 import { getFirmSettings, listBankHolidays, listInsurers } from "@/lib/db/settings";
-import type { Role } from "@/lib/domain/complaint";
+import type { NotificationType, Role } from "@/lib/domain/complaint";
+import { createDraftFor } from "@/lib/letters/drafts";
 import { todayUtc } from "@/lib/rules";
 import {
   actionDateSchema,
@@ -27,7 +28,8 @@ import {
 /**
  * Server actions for the complaint workflow. Each one: checks the role (requireRole), validates
  * the input (zod), checks the action policy with the rules engine, then calls the matching
- * database function, which writes the audit event in the same transaction.
+ * database function, which writes the audit event in the same transaction. Steps that need a
+ * customer communication then create its draft for the handler to review and send.
  */
 
 const WRITERS: Role[] = ["handler", "manager"];
@@ -38,7 +40,9 @@ async function guarded(
   roles: Role[],
   run: (db: Db) => Promise<void>,
   message: string,
+  draft?: NotificationType,
 ): Promise<ActionResult> {
+  let draftFailed = false;
   try {
     const user = await requireRole(...roles);
     const db = await createUserClient();
@@ -54,12 +58,22 @@ async function guarded(
       key,
     );
     await run(db);
+    if (draft) {
+      // The step itself is recorded; a failed draft must not undo it, so it is reported instead.
+      draftFailed = await createDraftFor(db, complaintId, draft).then(
+        () => false,
+        () => true,
+      );
+    }
   } catch (error) {
     return failure(error);
   }
   revalidatePath(`/complaints/${complaintId}`);
   revalidatePath("/");
-  return { ok: true, message };
+  if (!draft) return { ok: true, message };
+  return draftFailed
+    ? { ok: true, message: `${message} The letter draft could not be created; create it under Notifications.` }
+    : { ok: true, message: `${message} A letter draft is ready under Notifications.` };
 }
 
 const idOnly = z.object({ complaintId: z.uuid() });
@@ -102,7 +116,7 @@ export async function acknowledgeAction(_prev: ActionResult, form: FormData): Pr
   const parsed = actionDateSchema().safeParse(formToObject(form));
   if (!parsed.success) return invalid(parsed.error);
   const { complaintId, date } = parsed.data;
-  return guarded(complaintId, "acknowledge", WRITERS, (db) => repo.recordAcknowledgement(db, complaintId, date), "Acknowledgement recorded.");
+  return guarded(complaintId, "acknowledge", WRITERS, (db) => repo.recordAcknowledgement(db, complaintId, date), "Acknowledgement recorded.", "acknowledgement");
 }
 
 export async function setStatusAction(_prev: ActionResult, form: FormData): Promise<ActionResult> {
@@ -116,7 +130,7 @@ export async function holdingAction(_prev: ActionResult, form: FormData): Promis
   const parsed = actionDateSchema().safeParse(formToObject(form));
   if (!parsed.success) return invalid(parsed.error);
   const { complaintId, date } = parsed.data;
-  return guarded(complaintId, "holding", WRITERS, (db) => repo.recordHoldingResponse(db, complaintId, date), "Holding response recorded.");
+  return guarded(complaintId, "holding", WRITERS, (db) => repo.recordHoldingResponse(db, complaintId, date), "Holding response recorded.", "holding");
 }
 
 export async function summaryAction(_prev: ActionResult, form: FormData): Promise<ActionResult> {
@@ -129,6 +143,7 @@ export async function summaryAction(_prev: ActionResult, form: FormData): Promis
     WRITERS,
     (db) => repo.recordSummaryResolution(db, complaintId, findings || null),
     "Summary resolution recorded.",
+    "summary_resolution",
   );
 }
 
@@ -136,7 +151,7 @@ export async function finalResponseAction(_prev: ActionResult, form: FormData): 
   const parsed = finalResponseSchema().safeParse(formToObject(form, { numbers: ["compensationAmount"] }));
   if (!parsed.success) return invalid(parsed.error);
   const { complaintId, ...response } = parsed.data;
-  return guarded(complaintId, "final", WRITERS, (db) => repo.recordFinalResponse(db, complaintId, response), "Final response recorded.");
+  return guarded(complaintId, "final", WRITERS, (db) => repo.recordFinalResponse(db, complaintId, response), "Final response recorded.", "final_response");
 }
 
 export async function referLloydsAction(_prev: ActionResult, form: FormData): Promise<ActionResult> {
