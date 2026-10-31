@@ -133,6 +133,56 @@ textarea {
   white-space: nowrap;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-name {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.user-role {
+  color: var(--va-turquoise);
+  font-size: 0.7rem;
+}
+
+.button-on-navy {
+  background: transparent;
+  border: 1px solid var(--va-white);
+  border-radius: var(--radius);
+  color: var(--va-white);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 6px 12px;
+}
+
+.button-secondary {
+  background: var(--va-white);
+  border: 1px solid var(--va-navy);
+  border-radius: var(--radius);
+  color: var(--va-navy);
+  cursor: pointer;
+  padding: 10px 16px;
+}
+
+.button-on-navy:focus-visible,
+.button-secondary:focus-visible {
+  outline: 3px solid var(--va-turquoise);
+  outline-offset: 1px;
+}
+
 .content {
   max-width: 1200px;
   margin: 0 auto;
@@ -152,7 +202,8 @@ textarea {
     padding: 0 16px;
   }
 
-  .brand-subtitle {
+  .brand-subtitle,
+  .user-name {
     display: none;
   }
 

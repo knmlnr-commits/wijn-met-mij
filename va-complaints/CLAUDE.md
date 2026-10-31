@@ -33,7 +33,12 @@ for behaviour only, never port its code.
   as the signed in user under RLS; `createServiceClient()` (service role) is for admin tasks
   without a user session only. Database errors go through `toDataError` so constraint details
   (which can hold personal data) never reach the UI or logs.
-- `lib/auth/`: `requireRole(...)` for every server action and route handler.
+- `lib/auth/`: `requireRole(...)` for every server action and route handler;
+  `requirePageUser(...)` for pages. `proxy.ts` (Next 16's renamed middleware) only refreshes
+  the session and sends visitors without one to `/login`; roles come from `profiles` only.
+  Sign in: invited users by password or email link; `NEXT_PUBLIC_DEV_LOGIN=true` shows seeded
+  demo logins (never on production deployments); `AUTH_ENTRA_ENABLED=true` shows Microsoft
+  sign in (`docs/ENTRA_SETUP.md`). Redirect targets always go through `safeNextPath`.
 - `supabase/migrations/`: schema, RLS (default deny), audit trigger, one Postgres function per
   workflow action. `app.current_user_id()` is the only reference to Supabase Auth in SQL.
 - `supabase/tests/auth-shim.sql`: test only stand in for Supabase Auth on plain Postgres.

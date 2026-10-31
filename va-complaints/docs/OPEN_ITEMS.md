@@ -37,3 +37,6 @@ needed to run the sandbox, a demo value is used and marked.
 | 23 | Firm name and short name used in letters and "upheld against" | Seeded as "Van Ameyde" for both | W&C |
 | 24 | Hard delete when neither the insurer nor the firm settings hold a retention period | Blocked, so a record is never purged on an assumed period; all seeded insurers have one | Compliance |
 | 25 | Who may see soft deleted complaints | Manager and Compliance; hidden from handlers | Compliance |
+| 26 | Keep password and email link sign in as a fallback once Microsoft Entra ID is live | Both stay available until decided; switching Entra on does not remove them | Emanuel Rita |
+| 27 | Entra app registration (tenant, client secret owner and expiry, user assignment) | Documented in `docs/ENTRA_SETUP.md`; not configured | VAS platform team |
+| 28 | Email delivery for sign in links in the sandbox: Supabase's built in mailer is rate limited and meant for testing | Fine for a handful of invited users; a custom SMTP sender is needed before wider use (ties in with item 8) | VAS platform team |

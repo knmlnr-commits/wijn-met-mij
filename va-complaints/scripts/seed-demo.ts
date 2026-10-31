@@ -7,14 +7,17 @@
  */
 import { createClient } from "@supabase/supabase-js";
 import { Client } from "pg";
+import { DEMO_ACCOUNTS } from "@/lib/auth/config";
+import { ROLES } from "@/lib/domain/complaint";
 import { todayUtc } from "@/lib/rules";
 import { insertDemoComplaints, upsertProfile } from "./lib/seed-db";
 
-const DEMO_USERS = [
-  { key: "handler", email: "handler@example.test", display_name: "Demo Handler", role: "handler" },
-  { key: "manager", email: "manager@example.test", display_name: "Demo Manager", role: "manager" },
-  { key: "compliance", email: "compliance@example.test", display_name: "Demo Compliance", role: "compliance" },
-] as const;
+const DEMO_USERS = ROLES.map((role) => ({
+  key: role,
+  email: DEMO_ACCOUNTS[role].email,
+  display_name: DEMO_ACCOUNTS[role].displayName,
+  role,
+}));
 
 function required(name: string): string {
   const value = process.env[name];

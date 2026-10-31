@@ -4,7 +4,8 @@ Internal tool for complaint handlers to register, investigate, track and resolve
 complaints within the UK FCA DISP timeline and the Lloyd's complaints procedure.
 
 Status: release candidate in progress. Done: phase 0 (scaffold), phase 1 (rules engine,
-`lib/rules`) and phase 2 (database, RLS, workflow functions, seed). Authentication and screens follow. See `CLAUDE.md` for conventions and
+`lib/rules`), phase 2 (database, RLS, workflow functions, seed) and phase 3 (authentication).
+Screens, letters and handover follow. See `CLAUDE.md` for conventions and
 `docs/OPEN_ITEMS.md` for items awaiting confirmation.
 
 ## Local setup
@@ -21,7 +22,8 @@ npm run seed:demo           # three demo users and 25 synthetic complaints
 npm run dev
 ```
 
-Open http://localhost:3000. Demo users: `handler@example.test`, `manager@example.test` and
+Open http://localhost:3000. Set `NEXT_PUBLIC_DEV_LOGIN=true` in `.env.local` for one click demo
+logins, or sign in with a password. Demo users: `handler@example.test`, `manager@example.test` and
 `compliance@example.test`, with the password you set in `DEMO_USER_PASSWORD`.
 
 The seeded reference lists for product, channel, nature of complaint, root cause, secondary
