@@ -1,0 +1,155 @@
+.clock {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.head h2 {
+  margin: 0;
+}
+
+.track {
+  padding: 0 4%;
+  position: relative;
+}
+
+.line {
+  background: var(--grey-100);
+  border-radius: 3px;
+  height: 6px;
+  left: 4%;
+  position: absolute;
+  right: 4%;
+  top: 7px;
+}
+
+.progress {
+  background: var(--va-turquoise);
+  border-radius: 3px;
+  height: 100%;
+  width: var(--today);
+}
+
+.milestones {
+  display: flex;
+  justify-content: space-between;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+.milestones li {
+  align-items: center;
+  display: flex;
+  flex: 0 0 0;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  text-align: center;
+}
+
+.dot {
+  background: var(--va-white);
+  border: 3px solid var(--grey-300);
+  border-radius: 50%;
+  height: 20px;
+  width: 20px;
+}
+
+.passed .dot {
+  background: var(--va-navy);
+  border-color: var(--va-navy);
+}
+
+.label {
+  color: var(--va-navy);
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.date {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.today {
+  background: var(--va-navy);
+  border-radius: 4px;
+  color: var(--va-white);
+  font-size: 0.7rem;
+  left: calc(4% + var(--today) * 0.92);
+  padding: 1px 6px;
+  position: absolute;
+  top: -22px;
+  transform: translateX(-50%);
+}
+
+.legend {
+  margin: 20px 0 0;
+}
+
+.flags {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+@media (max-width: 640px) {
+  .track {
+    padding: 0 0 0 28px;
+  }
+
+  .line {
+    bottom: 10px;
+    height: auto;
+    left: 7px;
+    right: auto;
+    top: 10px;
+    width: 6px;
+  }
+
+  .progress {
+    height: var(--today);
+    width: 100%;
+  }
+
+  .milestones {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .milestones li {
+    align-items: baseline;
+    flex: 1 1 auto;
+    flex-direction: row;
+    gap: 10px;
+    position: relative;
+    text-align: left;
+  }
+
+  .dot {
+    left: -28px;
+    position: absolute;
+    top: 0;
+  }
+
+  .today {
+    left: -6px;
+    top: calc(var(--today) - 8px);
+    transform: translateX(-100%);
+    writing-mode: horizontal-tb;
+  }
+}

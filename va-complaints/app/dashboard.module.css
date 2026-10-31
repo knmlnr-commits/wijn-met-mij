@@ -1,0 +1,75 @@
+.tiles {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--va-turquoise);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+}
+
+.tile.alert {
+  border-left-color: var(--rag-red);
+}
+
+.value {
+  color: var(--va-navy);
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.label {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.filters {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 16px;
+}
+
+.filterButtons {
+  align-items: flex-end;
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 900px) {
+  .tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .filterButtons {
+    flex-direction: column;
+  }
+
+  .filterButtons > * {
+    text-align: center;
+    width: 100%;
+  }
+}

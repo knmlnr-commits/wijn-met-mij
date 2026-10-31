@@ -1,0 +1,495 @@
+/*
+ * Van Ameyde house style. Brand colours only (brand.vanameyde.com/guidelines/colours),
+ * plus white and neutral greys for surfaces and borders.
+ * Fonts: Georgia for headers, Verdana for body. No web font downloads.
+ */
+:root {
+  --va-navy: #07017e;
+  --va-turquoise: #00d8b9;
+  --va-misty-rose: #e5d3d1;
+  --va-white: #ffffff;
+
+  --grey-50: #f6f6f8;
+  --grey-100: #ececf0;
+  --grey-300: #d4d4dc;
+  --grey-500: #8a8a96;
+  --grey-700: #4e4e5a;
+  --grey-900: #22222a;
+
+  /* Functional RAG colours; TODO(CONFIRM) see docs/OPEN_ITEMS.md. Always paired with a text label. */
+  --rag-red: #b3261e;
+  --rag-amber: #b86e00;
+  --rag-green: #1b7a45;
+
+  --surface: var(--va-white);
+  --background: var(--grey-50);
+  --border: var(--grey-300);
+  --text: var(--grey-900);
+  --text-muted: var(--grey-700);
+  --accent: var(--va-turquoise);
+
+  --font-heading: Georgia, "Times New Roman", serif;
+  --font-body: Verdana, Geneva, sans-serif;
+
+  --radius: 6px;
+  --shadow: 0 1px 3px rgba(7, 1, 126, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--background);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  color: var(--va-navy);
+  margin: 0 0 0.5em;
+}
+
+h1 {
+  font-size: 1.7rem;
+}
+
+h2 {
+  font-size: 1.3rem;
+}
+
+h3 {
+  font-size: 1.05rem;
+}
+
+a {
+  color: var(--va-navy);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.app-header {
+  background: var(--va-navy);
+  color: var(--va-white);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 60px;
+  padding: 0 24px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  height: 38px;
+  width: 38px;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.brand-firm {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+}
+
+.brand-subtitle {
+  font-size: 0.75rem;
+  color: var(--va-turquoise);
+}
+
+.version-chip {
+  border: 1px solid var(--va-turquoise);
+  border-radius: 999px;
+  color: var(--va-white);
+  font-size: 0.7rem;
+  padding: 2px 10px;
+  white-space: nowrap;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-name {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.user-role {
+  color: var(--va-turquoise);
+  font-size: 0.7rem;
+}
+
+.button-on-navy {
+  background: transparent;
+  border: 1px solid var(--va-white);
+  border-radius: var(--radius);
+  color: var(--va-white);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 6px 12px;
+}
+
+.button-secondary {
+  background: var(--va-white);
+  border: 1px solid var(--va-navy);
+  border-radius: var(--radius);
+  color: var(--va-navy);
+  cursor: pointer;
+  padding: 10px 16px;
+}
+
+.button-on-navy:focus-visible,
+.button-secondary:focus-visible {
+  outline: 3px solid var(--va-turquoise);
+  outline-offset: 1px;
+}
+
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+@media (max-width: 640px) {
+  .app-header {
+    padding: 0 16px;
+  }
+
+  .brand-subtitle,
+  .user-name {
+    display: none;
+  }
+
+  .content {
+    padding: 16px;
+  }
+}
+
+/* ---------- Shared components ---------- */
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.page-header h1 {
+  margin: 0;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.small {
+  font-size: 0.8rem;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.grid-2 {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-3 {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.button-primary {
+  background: var(--va-navy);
+  border: 1px solid var(--va-navy);
+  border-radius: var(--radius);
+  color: var(--va-white);
+  cursor: pointer;
+  padding: 10px 16px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.button-primary:disabled,
+.button-secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.button-primary:focus-visible {
+  outline: 3px solid var(--va-turquoise);
+  outline-offset: 1px;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+table.data {
+  border-collapse: collapse;
+  min-width: 100%;
+  font-size: 0.85rem;
+}
+
+table.data th,
+table.data td {
+  border-bottom: 1px solid var(--grey-100);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+table.data th {
+  background: var(--grey-50);
+  color: var(--va-navy);
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+table.data td.wrap {
+  white-space: normal;
+  min-width: 220px;
+}
+
+table.data tr:last-child td {
+  border-bottom: none;
+}
+
+.num {
+  text-align: right;
+}
+
+.rag {
+  border-radius: 999px;
+  color: var(--va-white);
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 10px;
+}
+
+.rag-red {
+  background: var(--rag-red);
+}
+
+.rag-amber {
+  background: var(--rag-amber);
+}
+
+.rag-green {
+  background: var(--rag-green);
+}
+
+.badge {
+  background: var(--grey-100);
+  border-radius: 999px;
+  color: var(--grey-900);
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 2px 10px;
+}
+
+.badge-rose {
+  background: var(--va-misty-rose);
+}
+
+.notice {
+  background: var(--grey-100);
+  border-left: 4px solid var(--va-turquoise);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+}
+
+.notice-warn {
+  background: var(--va-misty-rose);
+  border-left-color: var(--va-navy);
+}
+
+.form-grid {
+  display: grid;
+  gap: 12px 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-grid .full {
+  grid-column: 1 / -1;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field label,
+.field legend {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.field input,
+.field select,
+.field textarea {
+  background: var(--va-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 9px 10px;
+  width: 100%;
+}
+
+.field textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible {
+  outline: 3px solid var(--va-turquoise);
+  outline-offset: 1px;
+}
+
+.field-error {
+  color: var(--rag-red);
+  font-size: 0.8rem;
+}
+
+.field fieldset {
+  border: none;
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+.check {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.form-message {
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  margin: 0;
+  padding: 10px 12px;
+}
+
+.form-message.ok {
+  background: var(--grey-100);
+}
+
+.form-message.error {
+  background: var(--va-misty-rose);
+}
+
+dl.meta {
+  display: grid;
+  gap: 6px 16px;
+  grid-template-columns: minmax(140px, max-content) 1fr;
+  margin: 0;
+}
+
+dl.meta dt {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+dl.meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-2,
+  .grid-3,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .button-primary,
+  .button-secondary,
+  .button-row > * {
+    width: 100%;
+  }
+
+  dl.meta {
+    grid-template-columns: 1fr;
+  }
+
+  dl.meta dd {
+    margin-bottom: 6px;
+  }
+}

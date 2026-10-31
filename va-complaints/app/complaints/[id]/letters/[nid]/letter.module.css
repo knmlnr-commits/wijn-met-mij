@@ -1,0 +1,33 @@
+.page {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  margin: 0 auto;
+  max-width: 210mm;
+  padding: 20mm;
+}
+
+.toolbar {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.letter {
+  font-family: var(--font-body);
+  font-size: 11pt;
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+@media print {
+  .toolbar {
+    display: none;
+  }
+
+  .page {
+    border: none;
+    padding: 0;
+  }
+}
