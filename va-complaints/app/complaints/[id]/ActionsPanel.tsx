@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
-import { CheckboxField, FormMessage, SelectField, SubmitButton, TextArea, TextField } from "@/components/forms";
+import { createContext, useActionState, useContext } from "react";
+import { CheckboxField, FormMessage, SelectField, TextArea, TextField } from "@/components/forms";
 import { IDLE, type ActionResult } from "@/lib/actions/state";
 import type { ActionAvailability, ActionKey } from "@/lib/complaints/policy";
 import { MANUAL_STATUSES, OUTCOME_LABELS, OUTCOMES, STATUS_LABELS } from "@/lib/domain/complaint";
@@ -33,26 +33,21 @@ interface Props {
   recommended: ActionKey | null;
 }
 
+/**
+ * One result for the whole panel. After a step succeeds its form leaves the list (the step is
+ * no longer available), so the confirmation has to live above the forms, not inside them.
+ */
+const PanelContext = createContext<{ run: (action: Action, form: FormData) => void; pending: boolean } | null>(null);
+
 function ActionForm({ complaintId, action, submit, children }: { complaintId: string; action: Action; submit: string; children?: React.ReactNode }) {
-  const [result, run] = useActionState(action, IDLE);
+  const panel = useContext(PanelContext);
   return (
-    <form action={run} className={styles.actionForm}>
+    <form action={(form) => panel?.run(action, form)} className={styles.actionForm}>
       <input type="hidden" name="complaintId" value={complaintId} />
       {children}
-      <FormMessage result={result} />
-      {result.ok && result.message.includes("letter draft") && (
-        <a href="#notifications" className="button-secondary">
-          Review the letter
-        </a>
-      )}
-      {result.fieldErrors && (
-        <ul className="field-error">
-          {Object.values(result.fieldErrors).map((m) => (
-            <li key={m}>{m}</li>
-          ))}
-        </ul>
-      )}
-      <SubmitButton>{submit}</SubmitButton>
+      <button type="submit" className="button-primary" disabled={panel?.pending}>
+        {panel?.pending ? "Saving..." : submit}
+      </button>
     </form>
   );
 }
@@ -60,6 +55,11 @@ function ActionForm({ complaintId, action, submit, children }: { complaintId: st
 /** The full action set; disabled actions show why. Every action is audited server side. */
 export function ActionsPanel({ complaintId, today, actions, firmShortName, holdingRequiresFosRights, recommended }: Props) {
   const none = IDLE;
+  const [result, dispatch, pending] = useActionState(
+    async (_prev: ActionResult, call: { action: Action; form: FormData }) => call.action(IDLE, call.form),
+    IDLE,
+  );
+  const panel = { run: (action: Action, form: FormData) => dispatch({ action, form }), pending };
   const date = (label: string) => <TextField name="date" label={label} type="date" result={none} required defaultValue={today} max={today} />;
   const parties = [
     { value: "insurer", label: "Insurer" },
@@ -166,6 +166,24 @@ export function ActionsPanel({ complaintId, today, actions, firmShortName, holdi
   return (
     <section className={styles.actions} aria-label="Actions" id="actions">
       <h2>Actions</h2>
+      {result.message && (
+        <div className={styles.outcome}>
+          <FormMessage result={result} />
+          {result.fieldErrors && (
+            <ul className="field-error">
+              {Object.values(result.fieldErrors).map((m) => (
+                <li key={m}>{m}</li>
+              ))}
+            </ul>
+          )}
+          {result.ok && result.message.includes("letter draft") && (
+            <a href="#notifications" className="button-secondary">
+              Review the letter
+            </a>
+          )}
+        </div>
+      )}
+      <PanelContext.Provider value={panel}>
       {usable.length === 0 && <p className="muted small">No actions are available on this complaint right now.</p>}
       <ul className={styles.actionList}>
         {usable.map((a) => (
@@ -199,6 +217,7 @@ export function ActionsPanel({ complaintId, today, actions, firmShortName, holdi
           {forms.delete}
         </details>
       )}
+      </PanelContext.Provider>
     </section>
   );
 }

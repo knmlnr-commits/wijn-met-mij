@@ -2,7 +2,7 @@
 
 ## 1. What is the release candidate status?
 
-Version 0.6.1 is a working release candidate running in a sandbox (Vercel preview and a
+Version 0.6.2 is a working release candidate running in a sandbox (Vercel preview and a
 Supabase project in London) with synthetic data only.
 
 Built and tested: registration, the regulatory clock per insurer, every workflow step with an

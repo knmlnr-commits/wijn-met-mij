@@ -1,5 +1,5 @@
 /** Release notes shown on the What's new page. Newest first. Keep APP_VERSION equal to the first entry. */
-export const APP_VERSION = "0.6.1";
+export const APP_VERSION = "0.6.2";
 
 export interface Release {
   version: string;
@@ -9,6 +9,16 @@ export interface Release {
 }
 
 export const CHANGELOG: Release[] = [
+  {
+    version: "0.6.2",
+    date: "11-11-2026",
+    title: "Handover and a clearer confirmation",
+    changes: [
+      "After an action the confirmation now stays visible at the top of Actions, with a link to the letter draft.",
+      "The process flow diagram is lighter: five points on one line with the side routes underneath.",
+      "Handover documents, a health check and an automated browser test of the main flow.",
+    ],
+  },
   {
     version: "0.6.1",
     date: "11-11-2026",

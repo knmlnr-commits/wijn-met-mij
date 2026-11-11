@@ -229,3 +229,10 @@
   font-weight: 700;
   margin-bottom: 12px;
 }
+
+.outcome {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
