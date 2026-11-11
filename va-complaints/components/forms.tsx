@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { useFormStatus } from "react-dom";
 import type { ActionResult } from "@/lib/actions/state";
 
@@ -55,14 +56,16 @@ export function TextField({
   defaultValue,
   ...rest
 }: FieldProps & { type?: string; defaultValue?: string | number | null; maxLength?: number; inputMode?: "decimal" | "text"; max?: string }) {
+  // Unique per instance: the same field name appears in several action forms on one page.
+  const id = `${useId()}-${name}`;
   return (
     <div className={`field ${className ?? ""}`}>
-      <label htmlFor={name}>
+      <label htmlFor={id}>
         {label}
         {required ? " (required)" : ""}
       </label>
       <input
-        id={name}
+        id={id}
         name={name}
         type={type}
         required={required}
@@ -77,13 +80,14 @@ export function TextField({
 }
 
 export function TextArea({ name, label, result, required, className, defaultValue }: FieldProps & { defaultValue?: string | null }) {
+  const id = `${useId()}-${name}`;
   return (
     <div className={`field ${className ?? ""}`}>
-      <label htmlFor={name}>
+      <label htmlFor={id}>
         {label}
         {required ? " (required)" : ""}
       </label>
-      <textarea id={name} name={name} required={required} defaultValue={defaultValue ?? ""} aria-invalid={Boolean(result.fieldErrors?.[name])} />
+      <textarea id={id} name={name} required={required} defaultValue={defaultValue ?? ""} aria-invalid={Boolean(result.fieldErrors?.[name])} />
       <FieldError result={result} name={name} />
     </div>
   );
@@ -105,14 +109,15 @@ export function SelectField({
   emptyLabel?: string;
   onChange?: (value: string) => void;
 }) {
+  const id = `${useId()}-${name}`;
   return (
     <div className={`field ${className ?? ""}`}>
-      <label htmlFor={name}>
+      <label htmlFor={id}>
         {label}
         {required ? " (required)" : ""}
       </label>
       <select
-        id={name}
+        id={id}
         name={name}
         required={required}
         defaultValue={defaultValue ?? ""}

@@ -27,8 +27,8 @@ export default defineConfig({
     url: `http://localhost:${port}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
-    // Without a real Supabase project the smoke covers routing and the login page only; no
-    // network call is made because there is no session. Phase 6 runs against a seeded project.
+    // Without a Supabase project the smoke covers routing, the login page and the health check.
+    // With E2E_FULL=1 and a seeded Supabase (see the e2e job in CI) flow.spec.ts runs the main flow.
     env: {
       NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54321",
       NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "e2e-placeholder-anon-key",
