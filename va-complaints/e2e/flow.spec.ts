@@ -32,14 +32,15 @@ test("handler registers, acknowledges and answers a complaint, then exports the 
 
   await page.getByRole("button", { name: "Record acknowledgement" }).click();
   await expect(page.getByText("Acknowledgement recorded.")).toBeVisible();
-  await expect(page.getByText("Acknowledgement sent", { exact: true })).toBeVisible();
+  await expect(page.getByText("Acknowledgement recorded", { exact: true })).toBeVisible();
 
   const actions = page.getByLabel("Actions");
   const finalForm = actions.locator("details", { hasText: "Send final response" });
-  if (!(await finalForm.getAttribute("open"))) await finalForm.locator("summary").click();
+  // The open attribute is an empty string when set, so read the property instead.
+  if (!(await finalForm.evaluate((el) => (el as HTMLDetailsElement).open))) await finalForm.locator("summary").click();
   await finalForm.getByLabel("Outcome (required)").selectOption({ label: "Not upheld" });
   await finalForm.getByRole("button", { name: "Record final response" }).click();
-  await expect(page.getByText("Final response sent", { exact: true })).toBeVisible();
+  await expect(page.getByText("Final response recorded", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Next step")).toContainText("Close the complaint");
   await expect(page.locator("#notifications")).toContainText("Final response");
 
