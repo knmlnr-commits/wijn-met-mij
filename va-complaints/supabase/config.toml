@@ -218,8 +218,9 @@ web3 = 30
 # secret = ""
 
 [auth.email]
-# Invited users only.
-enable_signup = false
+# Keep the email provider on: in the CLI this switch disables email sign in altogether, not only
+# sign up. New sign ups are already blocked by auth.enable_signup = false above.
+enable_signup = true
 # If enabled, a user will be required to confirm any email change on both the old, and new email
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true

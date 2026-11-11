@@ -13,7 +13,9 @@ To build a fresh one, follow the steps below.
 ## 1. Supabase project
 
 1. Create a project in the UK or EU region.
-2. Authentication, Providers, Email: switch **Allow new users to sign up** off.
+2. Authentication, Sign In / Providers: switch **Allow new users to sign up** off. Leave the
+   **Email** provider itself enabled; switching the provider off blocks every password and
+   email link sign in.
 3. Authentication, Password security: minimum length 12; switch leaked password protection on.
 4. Authentication, URL configuration: add `https://<app-domain>/auth/callback` (and the Vercel
    preview pattern if previews are used).
