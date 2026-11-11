@@ -20,7 +20,8 @@ export interface ClockModel {
 
 /**
  * Model for the regulatory clock. Milestones sit evenly spaced; today is interpolated by date
- * inside the segment it falls in. Order is by date, because a long acknowledgement target can
+ * inside the segment it falls in. The interim point is left out when it is not before the
+ * final deadline. Order is by date, because a long acknowledgement target can
  * fall after the day 3 summary deadline.
  */
 export function clockModel(t: Timeline): ClockModel {
@@ -32,7 +33,9 @@ export function clockModel(t: Timeline): ClockModel {
     { key: "interim", label: `Week ${Math.round(t.profile.interimDays / 7)} interim`, date: t.interimDate },
     { key: "final", label: "Final response deadline", date: t.finalResponseDeadline },
   ];
-  const milestones = unordered.sort(
+  // An interim point on or after the final deadline (short insurer deadlines) adds nothing.
+  const kept = unordered.filter((m) => m.key !== "interim" || dayNumber(m.date) < dayNumber(t.finalResponseDeadline));
+  const milestones = kept.sort(
     (a, b) => dayNumber(a.date) - dayNumber(b.date) || order.indexOf(a.key) - order.indexOf(b.key),
   );
 

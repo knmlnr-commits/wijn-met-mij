@@ -3,13 +3,13 @@ import { buildView } from "@/lib/complaints/view";
 import type { Db } from "@/lib/db/client";
 import { listComplaints } from "@/lib/db/complaints";
 import { loadContext } from "@/lib/db/context";
-import { addDays, isAfter, isIsoDate, type IsoDate, todayUtc } from "@/lib/rules";
-import { buildMiReport, type MiReport } from "./mi";
+import { isAfter, isIsoDate, type IsoDate, todayUtc } from "@/lib/rules";
+import { buildMiReport, defaultPeriod, type MiReport } from "./mi";
 
 /** Report period from query parameters; defaults to the last 12 months up to today. */
 export function reportPeriod(params: { from?: string | null; to?: string | null }, today: IsoDate = todayUtc()): { from: IsoDate; to: IsoDate } {
   const to = params.to && isIsoDate(params.to) && !isAfter(params.to, today) ? params.to : today;
-  const fallbackFrom = addDays(to, -364);
+  const fallbackFrom = defaultPeriod(to).from;
   const from = params.from && isIsoDate(params.from) && !isAfter(params.from, to) ? params.from : fallbackFrom;
   return { from, to };
 }

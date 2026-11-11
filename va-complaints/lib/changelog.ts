@@ -1,5 +1,5 @@
 /** Release notes shown on the What's new page. Newest first. Keep APP_VERSION equal to the first entry. */
-export const APP_VERSION = "0.6.0";
+export const APP_VERSION = "0.6.1";
 
 export interface Release {
   version: string;
@@ -9,6 +9,20 @@ export interface Release {
 }
 
 export const CHANGELOG: Release[] = [
+  {
+    version: "0.6.1",
+    date: "11-11-2026",
+    title: "Fixes from the first test run",
+    changes: [
+      "Bank holidays for England and Wales 2025 to 2027 are loaded, so business day deadlines skip them.",
+      "Upheld rate: one definition (upheld or partially upheld, of complaints with an outcome) and one period (last 12 months) on the dashboard and in Reports.",
+      "The dashboard shows why a complaint is red, amber or green under its colour.",
+      "Compensation outstanding: its own figure on the dashboard, an amber flag on the complaint, and included in Needs attention.",
+      "The regulatory clock leaves out the week 4 point when it falls on or after the final deadline.",
+      "Demo data: products, channels, natures, root causes, phone numbers and three vulnerable customers.",
+      "How it works: a process flow diagram.",
+    ],
+  },
   {
     version: "0.6.0",
     date: "11-11-2026",

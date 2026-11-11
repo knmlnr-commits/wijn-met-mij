@@ -64,7 +64,9 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
               <Row label="Final responses within deadline" value={report.finalResponsesInTime} />
               <Row label="Percent within deadline" value={formatPercent(report.percentInTime)} />
               <Row label="Average days to final response" value={report.averageDaysToFinalResponse ?? "Not applicable"} />
+              <Row label="Upheld rate (upheld or partially upheld, of complaints with an outcome)" value={formatPercent(report.upheldRate)} />
               <Row label="Total compensation" value={formatGBP(report.totalCompensation)} />
+              <Row label="Compensation outstanding" value={report.compensationOutstanding} />
               <Row label="Vulnerable customers" value={report.vulnerable} />
             </tbody>
           </table>

@@ -90,7 +90,11 @@ export function buildTimeline(input: TimelineInput): Timeline {
   const summaryRouteExpired = open && isAfter(today, summaryDeadline);
 
   const interimHoldingDue =
-    open && !lc.holdingResponseDate && !isAfter(interimDate, today) && isOnOrBefore(today, finalResponseDeadline);
+    open &&
+    !lc.holdingResponseDate &&
+    isAfter(finalResponseDeadline, interimDate) &&
+    !isAfter(interimDate, today) &&
+    isOnOrBefore(today, finalResponseDeadline);
 
   const finalResponseOverdue = open && isAfter(today, finalResponseDeadline);
   const finalResponseLate = finalResponseSent && isAfter(finalDate, finalResponseDeadline);

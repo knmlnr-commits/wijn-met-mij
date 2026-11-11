@@ -41,10 +41,10 @@ describe("regulatory clock model", () => {
     expect(lloyds("2026-09-01")).toMatchObject({ todayPosition: 1, todaySegment: 4 });
   });
 
-  it("handles milestones that fall on the same day", () => {
+  it("leaves out the interim point when it is not before the final deadline", () => {
     const m = clockModel(buildTimeline({ receivedDate: "2026-06-01", profile: SEEDED_INSURERS.Aviva, today: "2026-06-15" }));
-    expect(m.milestones.at(-2)?.date).toBe(m.milestones.at(-1)?.date);
-    expect(m.todayPosition).toBeGreaterThan(0.5);
-    expect(m.todayPosition).toBeLessThan(0.75);
+    expect(m.milestones.map((x) => x.key)).toEqual(["received", "acknowledgement", "summary", "final"]);
+    expect(m.todayPosition).toBeGreaterThan(0.66);
+    expect(m.todayPosition).toBeLessThan(1);
   });
 });

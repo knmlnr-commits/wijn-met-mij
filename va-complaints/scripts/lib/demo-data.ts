@@ -106,6 +106,35 @@ const SPECS: Spec[] = [
   },
 ];
 
+/**
+ * Demo reference values so the breakdowns have content. TODO(CONFIRM): placeholders for the
+ * sandbox only; the real lists come from spec section 3 and Complaint_Field_Requirements.xlsx
+ * (docs/OPEN_ITEMS.md). Loaded by the demo seed, never by supabase/seed.sql.
+ */
+export const DEMO_REFERENCE = {
+  ref_product: ["Motor", "Household / Property", "Travel", "Marine", "Commercial Property", "Liability", "Pet", "Other"],
+  ref_channel: ["Phone", "Email", "Letter", "In person", "Internal referral", "Insurer referral"],
+  ref_nature_of_complaint: ["Claims handling decision", "Delays / timescales", "Other general admin/customer service", "Errors / not following instructions", "Terms and disputed sums / charges"],
+  ref_root_cause: ["Claim - quantum", "Claim - delay", "Claim - declinature", "Communication", "Service provider"],
+  ref_secondary_cause: ["Process", "People", "Systems", "Third party"],
+  ref_vulnerability_category: ["Health", "Life events", "Resilience", "Capability"],
+} as const;
+
+export type DemoReferenceTable = keyof typeof DEMO_REFERENCE;
+
+/** Reference code for a demo label: upper case, non letters and digits to underscores. */
+export function demoCode(label: string): string {
+  return label.toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "");
+}
+
+export function demoReferenceRows(table: DemoReferenceTable) {
+  return DEMO_REFERENCE[table].map((label, i) => ({ code: demoCode(label), label, sort_order: (i + 1) * 10, is_active: true }));
+}
+
+const pick = (table: DemoReferenceTable, i: number) => demoCode(DEMO_REFERENCE[table][i % DEMO_REFERENCE[table].length]);
+/** Demo complaints (1 based) with a vulnerable customer. */
+const VULNERABLE = new Set([5, 9, 13]);
+
 const COMPLAINANT_TYPES = ["PH", "BROKER", "CLAIMANT", "SOLICITOR", "TENANT"];
 const TOPICS = [
   "delay in settling a claim",
@@ -129,6 +158,14 @@ export interface DemoComplaint {
     complainant_type: string;
     complainant_name: string;
     complainant_email: string;
+    complainant_phone: string | null;
+    product: string;
+    channel: string;
+    nature_of_complaint: string;
+    root_cause: string;
+    secondary_cause: string;
+    vulnerable_customer: boolean;
+    vulnerability_category: string | null;
     town: string;
     country: string;
     claim_related: boolean;
@@ -201,6 +238,15 @@ export function generateDemoComplaints(today: IsoDate): DemoComplaint[] {
         complainant_type: COMPLAINANT_TYPES[i % COMPLAINANT_TYPES.length],
         complainant_name: `Demo Complainant ${n}`,
         complainant_email: `demo${n}@example.test`,
+        // 01632 is the range Ofcom reserves for drama and examples.
+        complainant_phone: i % 3 === 0 ? `01632 9600${n}` : null,
+        product: pick("ref_product", i),
+        channel: pick("ref_channel", i * 5 + 1),
+        nature_of_complaint: pick("ref_nature_of_complaint", i * 3),
+        root_cause: pick("ref_root_cause", i * 2 + 1),
+        secondary_cause: pick("ref_secondary_cause", i),
+        vulnerable_customer: VULNERABLE.has(i + 1),
+        vulnerability_category: VULNERABLE.has(i + 1) ? pick("ref_vulnerability_category", i / 4) : null,
         town: "Testtown",
         country: "United Kingdom",
         claim_related: i % 4 !== 3,

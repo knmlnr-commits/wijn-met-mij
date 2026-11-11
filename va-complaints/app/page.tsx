@@ -3,7 +3,8 @@ import { Rag } from "@/components/Rag";
 import { can } from "@/lib/auth/roles";
 import { requirePageUser } from "@/lib/auth/session";
 import { nextStep } from "@/lib/complaints/next-step";
-import { buildView, type ComplaintView, type DashboardFilters, filterViews, isOpen, kpis, sortByRisk } from "@/lib/complaints/view";
+import { buildView, type ComplaintView, type DashboardFilters, filterViews, hasOutstandingWork, isOpen, kpis, ragReason, sortByRisk } from "@/lib/complaints/view";
+import { defaultPeriod, receivedInPeriod, upheldRate } from "@/lib/reports/mi";
 import { createUserClient } from "@/lib/db/client";
 import { listComplaints } from "@/lib/db/complaints";
 import { loadContext } from "@/lib/db/context";
@@ -29,7 +30,7 @@ function inView(v: ComplaintView, view: View): boolean {
   const c = v.complaint;
   switch (view) {
     case "attention":
-      return c.status !== "closed" && v.timeline.rag !== "green";
+      return c.status !== "closed" && (v.timeline.rag !== "green" || hasOutstandingWork(c));
     case "open":
       return isOpen(c);
     case "due":
@@ -83,6 +84,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const scoped = mine ? all.filter((v) => v.complaint.handler_id === user.id) : all;
   const shown = sortByRisk(filterViews(scoped.filter((v) => inView(v, view)), filters));
   const k = kpis(scoped);
+  const period = defaultPeriod(today);
+  const rate = upheldRate(receivedInPeriod(scoped, period.from, period.to));
   const moreFilters = [filters.status, filters.insurerId, filters.handlerId, filters.rag, filters.product, filters.vulnerable].some((v) => v !== undefined);
   const filtered = moreFilters || filters.search !== undefined;
   const href = (v: View, extra = "") => `/?view=${v}${mine ? "&mine=1" : ""}${extra}`;
@@ -103,7 +106,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         <Tile label="Breaching or overdue" value={k.breaching} tone={k.breaching > 0 ? "alert" : undefined} href={href("all", "&rag=red")} />
         <Tile label="Due within 7 days" value={k.dueWithin7Days} href={href("due")} />
         <Tile label="Resolved or closed" value={k.resolvedOrClosed} href={href("done")} />
-        <Tile label="Upheld rate" value={formatPercent(k.upheldRate)} href="/reports" />
+        <Tile label="Compensation outstanding" value={k.compensationOutstanding} tone={k.compensationOutstanding > 0 ? "warn" : undefined} href={href("all", "&status=compensation_outstanding")} />
+        <Tile label="Upheld rate, last 12 months" value={formatPercent(rate)} href="/reports" />
       </section>
 
       <div className={styles.toolbar}>
@@ -191,8 +195,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                     <div className="small">{c.complainant_name}</div>
                     {c.vulnerable_customer && <span className="badge badge-rose">Vulnerable</span>}
                   </td>
-                  <td>
+                  <td title={ragReason(t)}>
                     <Rag value={t.rag} />
+                    <div className="small muted">{ragReason(t)}</div>
+                    {c.status === "compensation_outstanding" && <span className={styles.flag}>Compensation outstanding</span>}
                   </td>
                   <td className={styles.step}>
                     <span className={step.tone === "urgent" ? styles.urgent : undefined}>{step.title}</span>
@@ -215,9 +221,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   );
 }
 
-function Tile({ label, value, tone, href }: { label: string; value: number | string; tone?: "alert"; href: string }) {
+function Tile({ label, value, tone, href }: { label: string; value: number | string; tone?: "alert" | "warn"; href: string }) {
   return (
-    <Link href={href} className={`${styles.tile} ${tone === "alert" ? styles.alert : ""}`}>
+    <Link href={href} className={`${styles.tile} ${tone === "alert" ? styles.alert : tone === "warn" ? styles.warn : ""}`}>
       <span className={styles.value}>{value}</span>
       <span className={styles.label}>{label}</span>
     </Link>

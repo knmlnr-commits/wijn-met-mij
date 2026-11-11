@@ -81,18 +81,31 @@ export interface Kpis {
   breaching: number;
   dueWithin7Days: number;
   resolvedOrClosed: number;
-  /** Upheld or partially upheld, as a percentage of complaints with an outcome; null when none. */
-  upheldRate: number | null;
+  compensationOutstanding: number;
 }
 
 export function kpis(views: ComplaintView[]): Kpis {
-  const withOutcome = views.filter((v) => v.complaint.outcome !== null);
-  const upheld = withOutcome.filter((v) => v.complaint.outcome !== "not_upheld");
   return {
     open: views.filter((v) => isOpen(v.complaint)).length,
     breaching: views.filter((v) => v.timeline.rag === "red" && v.complaint.status !== "closed").length,
     dueWithin7Days: views.filter((v) => isOpen(v.complaint) && v.timeline.daysToDeadline >= 0 && v.timeline.daysToDeadline <= 7).length,
     resolvedOrClosed: views.filter((v) => !isOpen(v.complaint)).length,
-    upheldRate: withOutcome.length === 0 ? null : Math.round((1000 * upheld.length) / withOutcome.length) / 10,
+    compensationOutstanding: views.filter((v) => v.complaint.status === "compensation_outstanding").length,
   };
+}
+
+/** Why a complaint has its RAG colour, in a few words; shown under the chip so red never looks like a bug. */
+export function ragReason(t: Timeline): string {
+  if (t.finalResponseLate) return "Final response sent late";
+  if (t.acknowledgementOverdue) return "Acknowledgement overdue";
+  if (t.finalResponseOverdue) return "Final response overdue";
+  if (t.summaryResolved) return "Summary resolved";
+  if (t.finalResponseSent) return "Answered in time";
+  if (t.rag === "amber") return t.awaitingAcknowledgement && t.daysToDeadline > t.profile.amberWindowDays ? "Acknowledgement due" : "Deadline close";
+  return "On track";
+}
+
+/** Work that still needs someone, beyond the regulatory RAG: unpaid compensation and actions after a decision. */
+export function hasOutstandingWork(c: Pick<ComplaintRow, "status">): boolean {
+  return c.status === "compensation_outstanding" || c.status === "actions_required_following_decision";
 }

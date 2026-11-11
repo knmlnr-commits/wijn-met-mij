@@ -71,6 +71,7 @@ export default async function ComplaintPage({ params }: { params: Promise<{ id: 
         <div className="button-row">
           <span className="badge">{STATUS_LABELS[complaint.status]}</span>
           <Rag value={view.timeline.rag} />
+          {complaint.status === "compensation_outstanding" && <span className="rag rag-amber">Compensation outstanding</span>}
           {complaint.vulnerable_customer && <span className="badge badge-rose">Vulnerable customer</span>}
           {complaint.is_deleted && <span className="badge badge-rose">Deleted</span>}
         </div>

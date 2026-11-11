@@ -65,6 +65,15 @@ describe("synthetic demo complaints", () => {
     }
   });
 
+  it("fills the classifications and marks three vulnerable customers with a category", () => {
+    expect(new Set(demo.map((d) => d.row.product)).size).toBeGreaterThanOrEqual(6);
+    expect(new Set(demo.map((d) => d.row.root_cause)).size).toBe(5);
+    const vulnerable = demo.filter((d) => d.row.vulnerable_customer);
+    expect(vulnerable).toHaveLength(3);
+    for (const d of vulnerable) expect(d.row.vulnerability_category).not.toBeNull();
+    for (const d of demo) if (d.row.complainant_phone) expect(d.row.complainant_phone).toMatch(/^01632 9600\d{2}$/);
+  });
+
   it("uses only obviously synthetic personal data", () => {
     for (const { row } of demo) {
       expect(row.complainant_name).toMatch(/^Demo Complainant \d{2}$/);

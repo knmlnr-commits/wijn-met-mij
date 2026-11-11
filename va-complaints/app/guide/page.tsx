@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ProcessFlow } from "@/components/ProcessFlow";
 import { requirePageUser } from "@/lib/auth/session";
 import { PROCESS, SCREEN_HELP } from "@/lib/help";
 import { FCA_DEFAULTS } from "@/lib/rules";
@@ -32,8 +33,13 @@ export default async function GuidePage() {
         complaint, tells you the next step, prepares the letters and records everything that happens.
       </p>
 
+      <section className="stack">
+        <h2>The process at a glance</h2>
+        <ProcessFlow />
+      </section>
+
       <section className="card stack">
-        <h2>The life of a complaint</h2>
+        <h2>The life of a complaint, step by step</h2>
         <ol className={styles.process}>
           {PROCESS.map((p, i) => (
             <li key={p.title}>

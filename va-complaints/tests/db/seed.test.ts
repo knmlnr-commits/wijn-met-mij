@@ -38,6 +38,7 @@ describe.skipIf(!dbTestsEnabled)("seed scripts", () => {
     await upsertBankHolidays(client, rows);
     await upsertBankHolidays(client, rows);
     const result = await client.query("select * from public.bank_holidays");
-    expect(result.rowCount).toBe(1);
+    // The demo seed already loaded the 24 built in dates, Christmas Day 2026 among them.
+    expect(result.rowCount).toBe(24);
   });
 });

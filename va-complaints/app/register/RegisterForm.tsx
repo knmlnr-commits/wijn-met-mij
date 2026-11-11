@@ -90,8 +90,12 @@ export function RegisterForm({ today, userId, insurers, firm, holidays, handlers
                 <dd>{formatDate(preview.timeline.acknowledgementDue)}</dd>
                 <dt>Summary resolution until</dt>
                 <dd>{formatDate(preview.timeline.summaryDeadline)}</dd>
-                <dt>Interim holding point</dt>
-                <dd>{formatDate(preview.timeline.interimDate)}</dd>
+                {isAfter(preview.timeline.finalResponseDeadline, preview.timeline.interimDate) && (
+                  <>
+                    <dt>Interim holding point</dt>
+                    <dd>{formatDate(preview.timeline.interimDate)}</dd>
+                  </>
+                )}
                 <dt>Final response deadline</dt>
                 <dd>
                   <strong>{formatDate(preview.timeline.finalResponseDeadline)}</strong>

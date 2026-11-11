@@ -5,7 +5,8 @@
 import type { ClientBase } from "pg";
 import type { IsoDate } from "@/lib/rules";
 import type { BankHolidaySeed } from "@/lib/holidays/govuk";
-import { generateDemoComplaints } from "./demo-data";
+import { BUILTIN_BANK_HOLIDAYS } from "@/lib/holidays/builtin";
+import { DEMO_REFERENCE, type DemoReferenceTable, demoReferenceRows, generateDemoComplaints } from "./demo-data";
 
 export interface DemoUsers {
   handler: string;
@@ -23,6 +24,15 @@ export async function insertDemoComplaints(client: ClientBase, users: DemoUsers,
 
   await client.query("begin");
   try {
+    // Demo reference values and built in bank holidays, so the sandbox is usable straight away.
+    for (const table of Object.keys(DEMO_REFERENCE) as DemoReferenceTable[]) {
+      for (const r of demoReferenceRows(table)) {
+        await client.query(`insert into public.${table} (code, label, sort_order) values ($1, $2, $3) on conflict (code) do nothing`, [r.code, r.label, r.sort_order]);
+      }
+    }
+    for (const h of BUILTIN_BANK_HOLIDAYS) {
+      await client.query("insert into public.bank_holidays (date, name, region) values ($1, $2, $3) on conflict (region, date) do nothing", [h.date, h.name, h.region]);
+    }
     for (const demo of generateDemoComplaints(today)) {
       const id = insurerId.get(demo.insurer);
       if (!id) throw new Error(`Insurer ${demo.insurer} is not seeded; run supabase/seed.sql first.`);

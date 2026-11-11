@@ -256,7 +256,8 @@ describe("seeded insurer profiles", () => {
     const r = t("2026-06-29", acked, SEEDED_INSURERS.Aviva);
     expect(r.finalResponseDeadline).toBe("2026-06-29");
     expect(r.interimDate).toBe("2026-06-29");
-    expect(r.interimHoldingDue).toBe(true);
+    // No separate interim prompt: it would fall on the deadline itself.
+    expect(r.interimHoldingDue).toBe(false);
     expect(r.holdingRequiresFosRights).toBe(true);
     expect(r.rag).toBe("amber");
     expect(t("2026-06-30", acked, SEEDED_INSURERS.Aviva).rag).toBe("red");

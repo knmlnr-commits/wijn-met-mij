@@ -1,6 +1,6 @@
 import type { ComplaintView } from "@/lib/complaints/view";
 import { OUTCOME_LABELS } from "@/lib/domain/complaint";
-import { addBusinessDays, daysBetween, type IsoDate, isAfter, UCR_DUE_BUSINESS_DAYS } from "@/lib/rules";
+import { addBusinessDays, addDays, daysBetween, type IsoDate, isAfter, UCR_DUE_BUSINESS_DAYS } from "@/lib/rules";
 
 /**
  * DISP 1.10 management information over complaints received in a date range. Whether a final
@@ -25,6 +25,8 @@ export interface MiReport {
   percentInTime: number | null;
   averageDaysToFinalResponse: number | null;
   totalCompensation: number;
+  upheldRate: number | null;
+  compensationOutstanding: number;
   vulnerable: number;
   byInsurer: Breakdown[];
   byProduct: Breakdown[];
@@ -32,6 +34,22 @@ export interface MiReport {
   byRootCause: Breakdown[];
   byOutcome: Breakdown[];
   byUpheldAgainst: Breakdown[];
+}
+
+/** Upheld or partially upheld, as a percentage of complaints with an outcome; null when none. One definition for every screen. */
+export function upheldRate(views: ComplaintView[]): number | null {
+  const withOutcome = views.filter((v) => v.complaint.outcome !== null);
+  if (withOutcome.length === 0) return null;
+  return Math.round((1000 * withOutcome.filter((v) => v.complaint.outcome !== "not_upheld").length) / withOutcome.length) / 10;
+}
+
+export function receivedInPeriod(views: ComplaintView[], from: IsoDate, to: IsoDate): ComplaintView[] {
+  return views.filter((v) => !isAfter(from, v.complaint.received_date) && !isAfter(v.complaint.received_date, to));
+}
+
+/** The default reporting period on every screen: the 12 months up to today. */
+export function defaultPeriod(today: IsoDate): { from: IsoDate; to: IsoDate } {
+  return { from: addDays(today, -364), to: today };
 }
 
 export interface MiLabels {
@@ -52,7 +70,7 @@ function breakdown(values: (string | null)[]): Breakdown[] {
 }
 
 export function buildMiReport(views: ComplaintView[], from: IsoDate, to: IsoDate, labels: MiLabels): MiReport {
-  const inRange = views.filter((v) => !isAfter(from, v.complaint.received_date) && !isAfter(v.complaint.received_date, to));
+  const inRange = receivedInPeriod(views, from, to);
   const finals = inRange.filter((v) => v.complaint.final_response_date !== null);
   const inTime = finals.filter((v) => !v.timeline.finalResponseLate);
   const durations = finals.map((v) => daysBetween(v.complaint.received_date, v.complaint.final_response_date as IsoDate));
@@ -75,6 +93,8 @@ export function buildMiReport(views: ComplaintView[], from: IsoDate, to: IsoDate
     averageDaysToFinalResponse:
       durations.length === 0 ? null : Math.round((10 * durations.reduce((a, b) => a + b, 0)) / durations.length) / 10,
     totalCompensation: Math.round(100 * inRange.reduce((sum, v) => sum + Number(v.complaint.compensation_amount ?? 0), 0)) / 100,
+    upheldRate: upheldRate(inRange),
+    compensationOutstanding: inRange.filter((v) => v.complaint.status === "compensation_outstanding").length,
     vulnerable: inRange.filter((v) => v.complaint.vulnerable_customer).length,
     byInsurer: breakdown(inRange.map((v) => v.insurerName)),
     byProduct: breakdown(inRange.map((v) => lookup(labels.product, v.complaint.product))),
@@ -114,7 +134,9 @@ export function miReportCsv(r: MiReport): string {
     ["Final responses within deadline", r.finalResponsesInTime],
     ["Percent within deadline", r.percentInTime],
     ["Average days to final response", r.averageDaysToFinalResponse],
+    ["Upheld rate (percent; upheld or partially upheld, of complaints with an outcome)", r.upheldRate],
     ["Total compensation (GBP)", r.totalCompensation.toFixed(2)],
+    ["Compensation outstanding", r.compensationOutstanding],
     ["Vulnerable customers", r.vulnerable],
   ];
   const groups: [string, Breakdown[]][] = [

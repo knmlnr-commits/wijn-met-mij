@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { availableActions, type PolicyInput } from "@/lib/complaints/policy";
-import { buildView, filterViews, kpis, sortByRisk } from "@/lib/complaints/view";
+import { buildView, filterViews, kpis, ragReason, sortByRisk } from "@/lib/complaints/view";
 import { formatDate, formatDateTime, formatGBP } from "@/lib/format";
-import { buildMiReport, csvCell, miReportCsv, ucrDueDate } from "@/lib/reports/mi";
+import { buildMiReport, csvCell, defaultPeriod, miReportCsv, receivedInPeriod, ucrDueDate, upheldRate } from "@/lib/reports/mi";
 import { EW_2026_DATES } from "@/lib/rules/test-fixtures";
 import { CONTEXT, complaintRow, demoViews } from "./fixtures";
 
@@ -96,9 +96,18 @@ describe("dashboard", () => {
     expect(filterViews(views, { insurerId: "ins-Aviva" }).every((v) => v.insurerName === "Aviva")).toBe(true);
     expect(filterViews(views, { handlerId: "p-manager" }).length).toBe(3);
     expect(filterViews(views, { status: "closed" }).length).toBe(3);
-    expect(filterViews(views, { vulnerable: true }).length).toBe(0);
+    expect(filterViews(views, { vulnerable: true }).length).toBe(3);
     expect(filterViews(views, { search: "c-000007" }).map((v) => v.complaint.reference)).toEqual(["C-000007"]);
     expect(filterViews(views, { search: "DEMO-CLM-12" }).length).toBe(1);
+  });
+
+  it("explains each RAG colour in a few words", () => {
+    const reasons = new Set(views.map((v) => `${v.timeline.rag}: ${ragReason(v.timeline)}`));
+    expect(reasons).toContain("red: Acknowledgement overdue");
+    expect(reasons).toContain("red: Final response overdue");
+    expect(reasons).toContain("red: Final response sent late");
+    expect(reasons).toContain("green: On track");
+    for (const r of reasons) if (r.startsWith("amber")) expect(["amber: Deadline close", "amber: Acknowledgement due"]).toContain(r);
   });
 
   it("computes the KPI tiles", () => {
@@ -106,8 +115,11 @@ describe("dashboard", () => {
     expect(k.open + k.resolvedOrClosed).toBe(25);
     expect(k.breaching).toBe(4);
     expect(k.dueWithin7Days).toBeGreaterThanOrEqual(1);
-    // Upheld or partially upheld: 3 of the 9 final responses.
-    expect(k.upheldRate).toBe(33.3);
+    expect(k.compensationOutstanding).toBe(1);
+    // One definition everywhere: upheld or partially upheld, of complaints with an outcome.
+    expect(upheldRate(views)).toBe(33.3);
+    const period = defaultPeriod(TODAY);
+    expect(upheldRate(receivedInPeriod(views, period.from, period.to))).toBe(buildMiReport(views, period.from, period.to, { product: new Map(), nature: new Map(), rootCause: new Map(), firmShortName: "x" }).upheldRate);
   });
 });
 
