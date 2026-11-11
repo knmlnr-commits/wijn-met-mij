@@ -21,6 +21,20 @@
   --rag-amber: #b86e00;
   --rag-green: #1b7a45;
 
+  /*
+   * Chart colours, defined once. Tints are mixed from the three brand colours with white;
+   * TODO(CONFIRM) against the tints on the brand site, see docs/OPEN_ITEMS.md item 37.
+   */
+  --chart-navy: var(--va-navy);
+  --chart-navy-60: #6a67b2;
+  --chart-navy-15: #dad9ec;
+  --chart-turquoise: var(--va-turquoise);
+  --chart-turquoise-30: #b3f3ea;
+  --chart-rose: var(--va-misty-rose);
+  --chart-muted: var(--grey-300);
+  --chart-track: var(--grey-100);
+  --chart-grid: var(--grey-100);
+
   --surface: var(--va-white);
   --background: var(--grey-50);
   --border: var(--grey-300);

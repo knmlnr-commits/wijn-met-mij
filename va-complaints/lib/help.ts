@@ -69,12 +69,18 @@ export const SCREEN_HELP: ScreenHelp[] = [
     key: "reports",
     match: (p) => p.startsWith("/reports"),
     title: "Reports",
-    purpose: "Management information for a period you choose, in the form the FCA rules (DISP 1.10) ask for.",
-    steps: ["Choose the period by received date and select Update report.", "Read the totals and the breakdowns.", "Select Export CSV to take the same figures into Excel."],
+    purpose: "Management information for a period and the insurers you choose, in the form the FCA rules (DISP 1.10) ask for.",
+    steps: [
+      "Choose the period by received date and, if you wish, one or more insurers; then select Update report.",
+      "Read the tiles for the totals, the monthly trend, and the bars for the breakdowns. Select a bar under By insurer to see that insurer only.",
+      "Select Export CSV to take the same figures, for the same selection, into Excel.",
+    ],
     tips: [
-      "Within deadline is judged against each insurer's own deadline, not one fixed number.",
+      "Within deadline is judged against each insurer's own deadline, not one fixed number. 95% or more shows as good, 85% to 95% as a warning, below 85% as an alert.",
+      "With two or more insurers selected a comparison table appears. Clear filters returns to all insurers.",
+      "The address of the page holds the period and the insurers, so a report can be shared as a link.",
       "The export contains totals only, no personal data.",
-      "The note at the top gives the date the FCA return for the period is due.",
+      "The note at the bottom gives the date the FCA return for the period is due.",
     ],
   },
   {

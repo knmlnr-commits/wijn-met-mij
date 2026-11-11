@@ -48,5 +48,5 @@ test("handler registers, acknowledges and answers a complaint, then exports the 
   const download = page.waitForEvent("download");
   await page.getByRole("link", { name: "Export CSV" }).click();
   const file = await download;
-  expect(file.suggestedFilename()).toMatch(/^complaints-mi-\d{4}-\d{2}-\d{2}-to-\d{4}-\d{2}-\d{2}\.csv$/);
+  expect(file.suggestedFilename()).toMatch(/^complaints-mi-\d{4}-\d{2}-\d{2}-to-\d{4}-\d{2}-\d{2}-all-insurers\.csv$/);
 });

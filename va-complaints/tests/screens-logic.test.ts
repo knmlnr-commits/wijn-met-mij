@@ -157,7 +157,7 @@ describe("DISP 1.10 MI", () => {
     expect(csvCell("=HYPERLINK(1)")).toBe("'=HYPERLINK(1)");
     expect(csvCell('Claim, "quantum"')).toBe('"Claim, ""quantum"""');
     const csv = miReportCsv(buildMiReport(views, "2025-01-01", TODAY, labels));
-    expect(csv.split("\r\n")[0]).toBe("Measure,Category,Value");
+    expect(csv.split("\r\n")[1]).toBe("Measure,Category,Value");
     expect(csv).toContain("Complaints received,,25");
   });
 

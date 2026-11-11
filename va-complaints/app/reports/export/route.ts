@@ -3,7 +3,7 @@ import { AuthError } from "@/lib/auth/roles";
 import { requireRole } from "@/lib/auth/session";
 import { createUserClient } from "@/lib/db/client";
 import { loadMiReport, reportPeriod } from "@/lib/reports/load";
-import { miReportCsv } from "@/lib/reports/mi";
+import { miReportCsv, miReportFileName } from "@/lib/reports/mi";
 
 /** DISP 1.10 MI as CSV. Aggregates only: no personal data in the export. */
 export async function GET(request: NextRequest) {
@@ -15,11 +15,12 @@ export async function GET(request: NextRequest) {
   }
   const { from, to } = reportPeriod({ from: request.nextUrl.searchParams.get("from"), to: request.nextUrl.searchParams.get("to") });
   const db = await createUserClient();
-  const csv = miReportCsv(await loadMiReport(db, from, to));
+  const { report } = await loadMiReport(db, from, to, request.nextUrl.searchParams.get("insurer"));
+  const csv = miReportCsv(report);
   return new NextResponse(csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="complaints-mi-${from}-to-${to}.csv"`,
+      "Content-Disposition": `attachment; filename="${miReportFileName(report)}"`,
       "Cache-Control": "no-store",
     },
   });

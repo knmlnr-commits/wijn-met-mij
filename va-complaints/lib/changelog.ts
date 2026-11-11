@@ -1,5 +1,5 @@
 /** Release notes shown on the What's new page. Newest first. Keep APP_VERSION equal to the first entry. */
-export const APP_VERSION = "0.6.3";
+export const APP_VERSION = "0.7.0";
 
 export interface Release {
   version: string;
@@ -9,6 +9,19 @@ export interface Release {
 }
 
 export const CHANGELOG: Release[] = [
+  {
+    version: "0.7.0",
+    date: "11-11-2026",
+    title: "Reports: insurer filter and charts",
+    changes: [
+      "Filter the report on one or more insurers. The selection is part of the page address, applies to every figure and to the CSV export, and can be cleared in one click.",
+      "Totals as tiles, with the share of final responses within deadline and the upheld rate highlighted (95% or more good, 85% to 95% warning, below 85% alert).",
+      "A monthly trend of complaints received with the share of final responses within deadline.",
+      "Breakdowns as bars with count and share of the total; outcome and upheld against as one bar split to 100%. Select an insurer bar to filter on it.",
+      "A comparison table when two or more insurers are selected.",
+      "The CSV export names the insurer filter in its file name and first row.",
+    ],
+  },
   {
     version: "0.6.3",
     date: "11-11-2026",
