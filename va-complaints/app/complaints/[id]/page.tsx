@@ -20,6 +20,7 @@ import { ActionsPanel } from "./ActionsPanel";
 import { EditDetails } from "./EditDetails";
 import { NotificationsPanel } from "./NotificationsPanel";
 import styles from "./detail.module.css";
+import { listAttachments } from "@/lib/db/attachments";
 
 export const metadata: Metadata = { title: "Complaint | Van Ameyde Complaints Management" };
 
@@ -38,7 +39,12 @@ export default async function ComplaintPage({ params }: { params: Promise<{ id: 
     if (error instanceof DataError && error.kind === "not_found") notFound();
     throw error;
   }
-  const [ctx, events, notifications] = await Promise.all([loadContext(db), listEvents(db, id), listNotifications(db, id)]);
+  const [ctx, events, notifications, attachments] = await Promise.all([
+    loadContext(db),
+    listEvents(db, id),
+    listNotifications(db, id),
+    listAttachments(db, id),
+  ]);
   const today = todayUtc();
   const view = buildView(complaint, ctx, today);
   const actions = availableActions({
@@ -110,7 +116,7 @@ export default async function ComplaintPage({ params }: { params: Promise<{ id: 
           />
         )}
         <div className={styles.side}>
-          <NotificationsPanel complaintId={complaint.id} notifications={notifications} canWrite={editable && !readOnly} />
+          <NotificationsPanel complaintId={complaint.id} notifications={notifications} attachments={attachments} canWrite={editable && !readOnly} />
           <Details complaint={complaint} ctx={ctx} isLloyds={view.insurer?.is_lloyds ?? false}>
             {editable && (
               <details>

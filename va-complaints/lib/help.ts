@@ -56,6 +56,7 @@ export const SCREEN_HELP: ScreenHelp[] = [
       "Read the Next step banner at the top; its button takes you to the right action.",
       "Do the action under Actions. Only actions that are possible now are shown; the rest are under Not available yet, each with the reason.",
       "When a step needs a letter, a draft appears under Notifications. Check it, edit if needed, then send it by email or issue it as a printed letter.",
+      "To send documents along, choose them under Attachments when you record the step, or add them to the draft afterwards. They can be changed until the letter is sent and are kept with it after that.",
       "Repeat until the complaint is answered, then close it.",
     ],
     tips: [

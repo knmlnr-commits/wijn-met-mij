@@ -1,5 +1,5 @@
 /** Release notes shown on the What's new page. Newest first. Keep APP_VERSION equal to the first entry. */
-export const APP_VERSION = "0.7.1";
+export const APP_VERSION = "0.8.0";
 
 export interface Release {
   version: string;
@@ -9,6 +9,17 @@ export interface Release {
 }
 
 export const CHANGELOG: Release[] = [
+  {
+    version: "0.8.0",
+    date: "11-11-2026",
+    title: "Attachments with letters and emails",
+    changes: [
+      "Choose attachments when you record an acknowledgement, holding response, summary resolution or final response; they are added to the letter draft and sent along with it.",
+      "Add or remove attachments on a draft under Notifications. Once the letter or email is sent, its attachments are fixed and can be downloaded.",
+      "Allowed: PDF, PNG, JPG, Word (docx) and Excel (xlsx); at most 5 files of 3 MB each per letter.",
+      "Every attachment added or removed is in the audit trail, with the file name.",
+    ],
+  },
   {
     version: "0.7.1",
     date: "11-11-2026",

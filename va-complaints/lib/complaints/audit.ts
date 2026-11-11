@@ -14,12 +14,17 @@ const STEP_TEXT: Record<string, string> = {
 
 export function describeEvent(e: Pick<ComplaintEventRow, "event_type" | "description" | "after">): string {
   if (STEP_TEXT[e.event_type]) return STEP_TEXT[e.event_type];
-  if (!e.event_type.startsWith("notification_")) return e.description;
+  if (!e.event_type.startsWith("notification_") && !e.event_type.startsWith("attachment_")) return e.description;
 
   const type = typeof e.after?.type === "string" ? (e.after.type as keyof typeof LETTER_TITLES) : null;
   const letter = type && LETTER_TITLES[type] ? `${LETTER_TITLES[type]} letter` : "Letter";
   const byEmail = e.after?.channel === "email";
+  const file = typeof e.after?.file_name === "string" ? `: ${e.after.file_name}` : "";
   switch (e.event_type) {
+    case "attachment_added":
+      return `Attachment added to the ${letter.toLowerCase()}${file}`;
+    case "attachment_removed":
+      return `Attachment removed from the ${letter.toLowerCase()}${file}`;
     case "notification_created":
       return `${letter} drafted`;
     case "notification_updated":

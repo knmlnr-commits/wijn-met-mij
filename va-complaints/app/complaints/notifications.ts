@@ -6,6 +6,8 @@ import { type ActionResult, failure, formToObject, invalid } from "@/lib/actions
 import { requireRole } from "@/lib/auth/session";
 import { PolicyError } from "@/lib/complaints/policy";
 import { createUserClient } from "@/lib/db/client";
+import { filesFrom, prepareAttachments, storeAttachments } from "@/lib/attachments/upload";
+import { getAttachmentFile, getAttachmentMeta, listNotificationAttachments, removeAttachment } from "@/lib/db/attachments";
 import { createDraftFor } from "@/lib/letters/drafts";
 import { getNotification, markNotificationSent, updateNotificationDraft } from "@/lib/db/notifications";
 import { NOTIFICATION_CHANNELS, NOTIFICATION_TYPES } from "@/lib/domain/complaint";
@@ -99,7 +101,9 @@ export async function sendNotificationAction(_prev: ActionResult, form: FormData
     if (changed(current, draft)) await updateNotificationDraft(db, notificationId, draft);
     if (draft.channel === "email") {
       const { subject, text } = splitStoredLetter(draft.content);
-      delivered = (await getEmailProvider().send({ to: draft.recipientEmail as string, subject, text })).ok;
+      const files = await Promise.all((await listNotificationAttachments(db, notificationId)).map((a) => getAttachmentFile(db, a.id)));
+      const attachments = files.map((f) => ({ fileName: f.fileName, contentType: f.contentType, content: f.bytes }));
+      delivered = (await getEmailProvider().send({ to: draft.recipientEmail as string, subject, text, attachments })).ok;
     }
     await markNotificationSent(db, notificationId, delivered);
   } catch (error) {
@@ -108,4 +112,42 @@ export async function sendNotificationAction(_prev: ActionResult, form: FormData
   refresh(complaintId);
   if (!delivered) return { ok: false, message: "The email could not be sent. It is marked as failed; you can try again." };
   return { ok: true, message: draft.channel === "email" ? "Email sent." : "Letter recorded as issued. Print it from the letter view." };
+}
+
+/** Adds files to a draft letter or email; they are sent along with it. */
+export async function addAttachmentsAction(_prev: ActionResult, form: FormData): Promise<ActionResult> {
+  const parsed = z.object({ notificationId: z.uuid() }).safeParse({ notificationId: form.get("notificationId") });
+  if (!parsed.success) return invalid(parsed.error);
+  const files = filesFrom(form);
+  if (files.length === 0) return { ok: false, message: "Choose a file first." };
+  let complaintId: string;
+  try {
+    await requireRole(...WRITERS);
+    const db = await createUserClient();
+    const current = await getNotification(db, parsed.data.notificationId);
+    complaintId = current.complaint_id;
+    if (current.status === "sent") throw new PolicyError("This notification has already been sent; its attachments are fixed.");
+    const existing = (await listNotificationAttachments(db, current.id)).length;
+    await storeAttachments(db, current.id, await prepareAttachments(files, existing));
+  } catch (error) {
+    return failure(error);
+  }
+  refresh(complaintId);
+  return { ok: true, message: files.length === 1 ? "Attachment added." : `${files.length} attachments added.` };
+}
+
+export async function removeAttachmentAction(_prev: ActionResult, form: FormData): Promise<ActionResult> {
+  const parsed = z.object({ attachmentId: z.uuid() }).safeParse({ attachmentId: form.get("attachmentId") });
+  if (!parsed.success) return invalid(parsed.error);
+  let complaintId: string;
+  try {
+    await requireRole(...WRITERS);
+    const db = await createUserClient();
+    complaintId = (await getAttachmentMeta(db, parsed.data.attachmentId)).complaint_id;
+    await removeAttachment(db, parsed.data.attachmentId);
+  } catch (error) {
+    return failure(error);
+  }
+  refresh(complaintId);
+  return { ok: true, message: "Attachment removed." };
 }

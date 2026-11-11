@@ -46,6 +46,9 @@ for behaviour only, never port its code.
   Lloyd's then FOS for Lloyd's insurers). Missing wording renders as a `[[ ]]` placeholder and
   blocks sending. `lib/email/`: `EmailProvider` (stub by default; no content or full address
   in logs).
+- `lib/attachments/`: what may be attached to a letter or email (`rules.ts`, pure) and the
+  upload helper. Files live in `notification_attachments`; the content is read only through
+  `get_notification_attachment`, and attachments are fixed once the notification is sent.
 - `app/`: screens. Server actions live next to their pages (`app/complaints/actions.ts`,
   `app/settings/actions.ts`); every one runs requireRole, zod and the policy, then a repo call.
 - `lib/auth/`: `requireRole(...)` for every server action and route handler;

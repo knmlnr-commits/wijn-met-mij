@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { FormMessage } from "@/components/forms";
+import { AttachmentsField, FormMessage } from "@/components/forms";
+import { ATTACHMENT_HINT, ATTACHMENT_MAX_PER_NOTIFICATION, formatFileSize } from "@/lib/attachments/rules";
 import { IDLE } from "@/lib/actions/state";
-import type { NotificationRow } from "@/lib/db/types";
+import type { AttachmentRow, NotificationRow } from "@/lib/db/types";
 import { NOTIFICATION_TYPES } from "@/lib/domain/complaint";
 import { formatDateTime } from "@/lib/format";
 import { hasPlaceholders, LETTER_TITLES } from "@/lib/letters/templates";
-import { createNotificationAction, saveNotificationAction, sendNotificationAction } from "../notifications";
+import { addAttachmentsAction, createNotificationAction, removeAttachmentAction, saveNotificationAction, sendNotificationAction } from "../notifications";
 import styles from "./detail.module.css";
 
 const STATUS_TEXT = { draft: "Draft", sent: "Sent", failed: "Failed" } as const;
@@ -60,7 +61,67 @@ function DraftEditor({ n, canWrite }: { n: NotificationRow; canWrite: boolean })
   );
 }
 
-export function NotificationsPanel({ complaintId, notifications, canWrite }: { complaintId: string; notifications: NotificationRow[]; canWrite: boolean }) {
+/** The files that go out with one letter or email. They can change while it is a draft and are fixed once it is sent. */
+function Attachments({ n, complaintId, files, canWrite }: { n: NotificationRow; complaintId: string; files: AttachmentRow[]; canWrite: boolean }) {
+  const [addResult, add, adding] = useActionState(addAttachmentsAction, IDLE);
+  const [removeResult, remove, removing] = useActionState(removeAttachmentAction, IDLE);
+  const editable = canWrite && n.status !== "sent";
+  if (files.length === 0 && !editable) return null;
+  const result = removeResult.message && !addResult.message ? removeResult : addResult.message ? addResult : removeResult;
+
+  return (
+    <div className={styles.attachments}>
+      <h3>Attachments{files.length > 0 ? ` (${files.length})` : ""}</h3>
+      {files.length === 0 ? (
+        <p className="muted small">None. Files added here are sent along with this {n.channel === "email" ? "email" : "letter"}.</p>
+      ) : (
+        <ul className={styles.attachmentList}>
+          {files.map((f) => (
+            <li key={f.id}>
+              <a href={`/complaints/${complaintId}/attachments/${f.id}`} download>
+                {f.file_name}
+              </a>
+              <span className="muted small">{formatFileSize(f.size_bytes)}</span>
+              {editable && (
+                <form action={remove}>
+                  <input type="hidden" name="attachmentId" value={f.id} />
+                  <button type="submit" className="button-link" disabled={removing} aria-label={`Remove ${f.file_name}`}>
+                    Remove
+                  </button>
+                </form>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {n.status !== "sent" && n.channel === "letter" && files.length > 0 && (
+        <p className="muted small">For a printed letter, download and print the attachments as enclosures.</p>
+      )}
+      {editable && files.length < ATTACHMENT_MAX_PER_NOTIFICATION && (
+        <form action={add} className={styles.attachmentAdd}>
+          <input type="hidden" name="notificationId" value={n.id} />
+          <AttachmentsField label="Add attachments" hint={ATTACHMENT_HINT} />
+          <button type="submit" className="button-secondary" disabled={adding}>
+            {adding ? "Uploading..." : "Add"}
+          </button>
+        </form>
+      )}
+      <FormMessage result={result} />
+    </div>
+  );
+}
+
+export function NotificationsPanel({
+  complaintId,
+  notifications,
+  attachments,
+  canWrite,
+}: {
+  complaintId: string;
+  notifications: NotificationRow[];
+  attachments: AttachmentRow[];
+  canWrite: boolean;
+}) {
   const [createResult, create, creating] = useActionState(createNotificationAction, IDLE);
 
   return (
@@ -68,7 +129,8 @@ export function NotificationsPanel({ complaintId, notifications, canWrite }: { c
       <h2 id="notifications-heading">Notifications</h2>
       <p className="small muted">
         Recording an acknowledgement, holding response, summary resolution or final response creates a letter draft here. Review and edit it, then
-        send it by email or issue it as a printed letter. The content sent is kept with the complaint.
+        send it by email or issue it as a printed letter. Attachments added at the step, or on the draft, are sent along. The content sent is kept
+        with the complaint.
       </p>
 
       {notifications.length === 0 && <p className="muted">No customer communications yet.</p>}
@@ -77,6 +139,9 @@ export function NotificationsPanel({ complaintId, notifications, canWrite }: { c
         <details key={n.id} className="card" open={n.status !== "sent"}>
           <summary>
             <strong>{LETTER_TITLES[n.type]}</strong> <span className="badge">{STATUS_TEXT[n.status]}</span>{" "}
+            {attachments.some((a) => a.notification_id === n.id) && (
+              <span className="badge">{attachments.filter((a) => a.notification_id === n.id).length} attached</span>
+            )}{" "}
             <span className="muted small">
               {n.channel === "email" ? "Email" : "Letter"}, created {formatDateTime(n.created_at)}
               {n.sent_at ? `, sent ${formatDateTime(n.sent_at)}` : ""}
@@ -99,6 +164,7 @@ export function NotificationsPanel({ complaintId, notifications, canWrite }: { c
           ) : (
             <DraftEditor n={n} canWrite={canWrite} />
           )}
+          <Attachments n={n} complaintId={complaintId} files={attachments.filter((a) => a.notification_id === n.id)} canWrite={canWrite} />
         </details>
       ))}
 

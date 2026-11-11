@@ -139,6 +139,17 @@ export interface ComplaintEventRow {
   after: Record<string, unknown> | null;
 }
 
+export interface AttachmentRow {
+  id: string;
+  notification_id: string;
+  complaint_id: string;
+  file_name: string;
+  content_type: string;
+  size_bytes: number;
+  created_at: string;
+  created_by: string | null;
+}
+
 export interface NotificationRow {
   id: string;
   complaint_id: string;

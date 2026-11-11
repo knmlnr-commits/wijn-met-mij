@@ -11,6 +11,7 @@ import { createUserClient, type Db } from "@/lib/db/client";
 import * as repo from "@/lib/db/complaints";
 import { getFirmSettings, listBankHolidays, listInsurers } from "@/lib/db/settings";
 import type { NotificationType, Role } from "@/lib/domain/complaint";
+import { filesFrom, type PreparedAttachment, prepareAttachments, storeAttachments } from "@/lib/attachments/upload";
 import { createDraftFor } from "@/lib/letters/drafts";
 import { todayUtc } from "@/lib/rules";
 import {
@@ -41,10 +42,14 @@ async function guarded(
   run: (db: Db) => Promise<void>,
   message: string,
   draft?: NotificationType,
+  files: File[] = [],
 ): Promise<ActionResult> {
   let draftFailed = false;
+  let attachFailed = false;
   try {
     const user = await requireRole(...roles);
+    // Files are checked before the step is recorded, so a refused file never leaves a half done step.
+    const attachments: PreparedAttachment[] = draft ? await prepareAttachments(files) : [];
     const db = await createUserClient();
     const [complaint, firm, insurers, holidays] = await Promise.all([
       repo.getComplaint(db, complaintId),
@@ -60,10 +65,14 @@ async function guarded(
     await run(db);
     if (draft) {
       // The step itself is recorded; a failed draft must not undo it, so it is reported instead.
-      draftFailed = await createDraftFor(db, complaintId, draft).then(
-        () => false,
-        () => true,
-      );
+      const draftId = await createDraftFor(db, complaintId, draft).catch(() => null);
+      draftFailed = draftId === null;
+      if (draftId && attachments.length > 0) {
+        attachFailed = await storeAttachments(db, draftId, attachments).then(
+          () => false,
+          () => true,
+        );
+      }
     }
   } catch (error) {
     return failure(error);
@@ -71,9 +80,13 @@ async function guarded(
   revalidatePath(`/complaints/${complaintId}`);
   revalidatePath("/");
   if (!draft) return { ok: true, message };
-  return draftFailed
-    ? { ok: true, message: `${message} The letter draft could not be created; create it under Notifications.` }
-    : { ok: true, message: `${message} A letter draft is ready under Notifications.` };
+  if (draftFailed) {
+    const lost = files.length > 0 ? " The attachments were not kept; add them to the draft there." : "";
+    return { ok: true, message: `${message} The letter draft could not be created; create it under Notifications.${lost}` };
+  }
+  if (attachFailed) return { ok: true, message: `${message} A letter draft is ready under Notifications, but not every attachment could be added; check the draft.` };
+  const attached = files.length === 0 ? "" : files.length === 1 ? " with 1 attachment" : ` with ${files.length} attachments`;
+  return { ok: true, message: `${message} A letter draft${attached} is ready under Notifications.` };
 }
 
 const idOnly = z.object({ complaintId: z.uuid() });
@@ -116,7 +129,7 @@ export async function acknowledgeAction(_prev: ActionResult, form: FormData): Pr
   const parsed = actionDateSchema().safeParse(formToObject(form));
   if (!parsed.success) return invalid(parsed.error);
   const { complaintId, date } = parsed.data;
-  return guarded(complaintId, "acknowledge", WRITERS, (db) => repo.recordAcknowledgement(db, complaintId, date), "Acknowledgement recorded.", "acknowledgement");
+  return guarded(complaintId, "acknowledge", WRITERS, (db) => repo.recordAcknowledgement(db, complaintId, date), "Acknowledgement recorded.", "acknowledgement", filesFrom(form));
 }
 
 export async function setStatusAction(_prev: ActionResult, form: FormData): Promise<ActionResult> {
@@ -130,7 +143,7 @@ export async function holdingAction(_prev: ActionResult, form: FormData): Promis
   const parsed = actionDateSchema().safeParse(formToObject(form));
   if (!parsed.success) return invalid(parsed.error);
   const { complaintId, date } = parsed.data;
-  return guarded(complaintId, "holding", WRITERS, (db) => repo.recordHoldingResponse(db, complaintId, date), "Holding response recorded.", "holding");
+  return guarded(complaintId, "holding", WRITERS, (db) => repo.recordHoldingResponse(db, complaintId, date), "Holding response recorded.", "holding", filesFrom(form));
 }
 
 export async function summaryAction(_prev: ActionResult, form: FormData): Promise<ActionResult> {
@@ -144,6 +157,7 @@ export async function summaryAction(_prev: ActionResult, form: FormData): Promis
     (db) => repo.recordSummaryResolution(db, complaintId, findings || null),
     "Summary resolution recorded.",
     "summary_resolution",
+    filesFrom(form),
   );
 }
 
@@ -151,7 +165,7 @@ export async function finalResponseAction(_prev: ActionResult, form: FormData): 
   const parsed = finalResponseSchema().safeParse(formToObject(form, { numbers: ["compensationAmount"] }));
   if (!parsed.success) return invalid(parsed.error);
   const { complaintId, ...response } = parsed.data;
-  return guarded(complaintId, "final", WRITERS, (db) => repo.recordFinalResponse(db, complaintId, response), "Final response recorded.", "final_response");
+  return guarded(complaintId, "final", WRITERS, (db) => repo.recordFinalResponse(db, complaintId, response), "Final response recorded.", "final_response", filesFrom(form));
 }
 
 export async function referLloydsAction(_prev: ActionResult, form: FormData): Promise<ActionResult> {

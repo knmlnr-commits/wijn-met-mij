@@ -236,3 +236,45 @@
   gap: 8px;
   margin-bottom: 12px;
 }
+
+.attachments {
+  border-top: 1px solid var(--border);
+  margin-top: 16px;
+  padding-top: 12px;
+}
+
+.attachments h3 {
+  margin-bottom: 6px;
+}
+
+.attachmentList {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.attachmentList li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+.attachmentList a {
+  overflow-wrap: anywhere;
+}
+
+.attachmentAdd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.attachmentAdd > div {
+  flex: 1 1 260px;
+}

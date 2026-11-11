@@ -10,6 +10,7 @@ export interface EmailMessage {
   to: string;
   subject: string;
   text: string;
+  attachments?: { fileName: string; contentType: string; content: Buffer }[];
 }
 
 export interface EmailResult {
@@ -26,7 +27,7 @@ export const stubEmailProvider: EmailProvider = {
   name: "stub",
   async send(message) {
     // No content and no full address in the log: personal data stays out of logs.
-    console.info(JSON.stringify({ event: "email.stub", to: redactEmail(message.to), length: message.text.length }));
+    console.info(JSON.stringify({ event: "email.stub", to: redactEmail(message.to), length: message.text.length, attachments: message.attachments?.length ?? 0 }));
     return { ok: true, providerId: `stub-${Date.now()}` };
   },
 };

@@ -1,7 +1,8 @@
 "use client";
 
 import { createContext, useActionState, useContext } from "react";
-import { CheckboxField, FormMessage, SelectField, TextArea, TextField } from "@/components/forms";
+import { AttachmentsField, CheckboxField, FormMessage, SelectField, TextArea, TextField } from "@/components/forms";
+import { ATTACHMENT_HINT } from "@/lib/attachments/rules";
 import { IDLE, type ActionResult } from "@/lib/actions/state";
 import type { ActionAvailability, ActionKey } from "@/lib/complaints/policy";
 import { MANUAL_STATUSES, OUTCOME_LABELS, OUTCOMES, STATUS_LABELS } from "@/lib/domain/complaint";
@@ -61,6 +62,7 @@ export function ActionsPanel({ complaintId, today, actions, firmShortName, holdi
   );
   const panel = { run: (action: Action, form: FormData) => dispatch({ action, form }), pending };
   const date = (label: string) => <TextField name="date" label={label} type="date" result={none} required defaultValue={today} max={today} />;
+  const attachments = <AttachmentsField hint={`Added to the letter draft and sent with it. ${ATTACHMENT_HINT}`} />;
   const parties = [
     { value: "insurer", label: "Insurer" },
     { value: "firm", label: firmShortName },
@@ -70,6 +72,7 @@ export function ActionsPanel({ complaintId, today, actions, firmShortName, holdi
     acknowledge: (
       <ActionForm complaintId={complaintId} action={acknowledgeAction} submit="Record acknowledgement">
         {date("Date sent")}
+        {attachments}
       </ActionForm>
     ),
     status: (
@@ -83,11 +86,13 @@ export function ActionsPanel({ complaintId, today, actions, firmShortName, holdi
           <p className="notice notice-warn small">The final response deadline has been reached: this holding response must explain the delay and give the FOS referral rights.</p>
         )}
         {date("Date sent")}
+        {attachments}
       </ActionForm>
     ),
     summary: (
       <ActionForm complaintId={complaintId} action={summaryAction} submit="Record summary resolution">
         <TextArea name="findings" label="How it was resolved" result={none} />
+        {attachments}
       </ActionForm>
     ),
     final: (
@@ -98,6 +103,7 @@ export function ActionsPanel({ complaintId, today, actions, firmShortName, holdi
         <TextField name="compensationAmount" label="Compensation (GBP)" result={none} inputMode="decimal" />
         <SelectField name="compensationPaidBy" label="Compensation paid by" result={none} options={parties} />
         <TextArea name="findings" label="Findings" result={none} />
+        {attachments}
       </ActionForm>
     ),
     referLloyds: (

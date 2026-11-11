@@ -3,6 +3,7 @@
 import { useId } from "react";
 import { useFormStatus } from "react-dom";
 import type { ActionResult } from "@/lib/actions/state";
+import { ATTACHMENT_ACCEPT } from "@/lib/attachments/rules";
 
 /** Small form building blocks shared by every screen. */
 
@@ -160,5 +161,19 @@ export function CheckboxField({ name, label, defaultChecked, onChange }: { name:
       <input type="checkbox" name={name} defaultChecked={defaultChecked} onChange={onChange ? (e) => onChange(e.target.checked) : undefined} />
       {label}
     </label>
+  );
+}
+
+/** File input for attachments that go out with a letter or email. Limits are checked again on the server. */
+export function AttachmentsField({ label = "Attachments to send along (optional)", hint }: { label?: string; hint: string }) {
+  const id = `${useId()}-attachments`;
+  return (
+    <div className="field">
+      <label htmlFor={id}>{label}</label>
+      <input id={id} name="attachments" type="file" multiple accept={ATTACHMENT_ACCEPT} aria-describedby={`${id}-hint`} />
+      <span id={`${id}-hint`} className="muted small">
+        {hint}
+      </span>
+    </div>
   );
 }

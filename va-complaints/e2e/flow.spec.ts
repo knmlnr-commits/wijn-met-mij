@@ -30,8 +30,16 @@ test("handler registers, acknowledges and answers a complaint, then exports the 
   await expect(page.getByRole("heading", { level: 1 })).toContainText(name);
   await expect(page.getByLabel("Next step")).toContainText("Send the acknowledgement");
 
+  // A synthetic PDF goes along with the acknowledgement.
+  await page
+    .getByLabel("Actions")
+    .locator("details", { hasText: "Send acknowledgement" })
+    .getByLabel("Attachments to send along (optional)")
+    .setInputFiles({ name: "synthetic-terms.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4 synthetic end to end test file") });
   await page.getByRole("button", { name: "Record acknowledgement" }).click();
-  await expect(page.getByText("Acknowledgement recorded.")).toBeVisible();
+  await expect(page.getByText("Acknowledgement recorded. A letter draft with 1 attachment is ready")).toBeVisible();
+  await expect(page.locator("#notifications").getByRole("link", { name: "synthetic-terms.pdf" })).toBeVisible();
+  await expect(page.getByText("Attachment added to the acknowledgement letter: synthetic-terms.pdf")).toBeVisible();
   await expect(page.getByText("Acknowledgement recorded", { exact: true })).toBeVisible();
 
   const actions = page.getByLabel("Actions");
