@@ -20,6 +20,7 @@ export interface MiReport {
   resolved: number;
   openAtPeriodEnd: number;
   summaryResolutions: number;
+  acknowledgementsLate: number;
   finalResponses: number;
   finalResponsesInTime: number;
   percentInTime: number | null;
@@ -87,6 +88,7 @@ export function buildMiReport(views: ComplaintView[], from: IsoDate, to: IsoDate
       return c.final_response_date === null || isAfter(c.final_response_date, to);
     }).length,
     summaryResolutions: inRange.filter((v) => v.complaint.resolution_path === "summary_resolution").length,
+    acknowledgementsLate: inRange.filter((v) => v.timeline.acknowledgementLate || v.timeline.acknowledgementOverdue).length,
     finalResponses: finals.length,
     finalResponsesInTime: inTime.length,
     percentInTime: finals.length === 0 ? null : Math.round((1000 * inTime.length) / finals.length) / 10,
@@ -130,6 +132,7 @@ export function miReportCsv(r: MiReport): string {
     ["Resolved", r.resolved],
     ["Open at period end", r.openAtPeriodEnd],
     ["Summary resolutions", r.summaryResolutions],
+    ["Acknowledgements late or overdue", r.acknowledgementsLate],
     ["Final responses", r.finalResponses],
     ["Final responses within deadline", r.finalResponsesInTime],
     ["Percent within deadline", r.percentInTime],

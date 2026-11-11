@@ -60,6 +60,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
               <Row label="Resolved" value={report.resolved} />
               <Row label="Open at period end" value={report.openAtPeriodEnd} />
               <Row label="Summary resolutions (DISP 1.5)" value={report.summaryResolutions} />
+              <Row label="Acknowledgements late or overdue" value={report.acknowledgementsLate} />
               <Row label="Final responses" value={report.finalResponses} />
               <Row label="Final responses within deadline" value={report.finalResponsesInTime} />
               <Row label="Percent within deadline" value={formatPercent(report.percentInTime)} />

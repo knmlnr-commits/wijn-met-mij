@@ -93,7 +93,8 @@ const SPECS: Spec[] = [
   { insurer: "AXA", status: "closed", ago: 15, summary: true, closed: 2 },
   { insurer: "Lloyd's", status: "acknowledged", ago: 3, ack: 1 },
   { insurer: "Zurich", status: "investigating", ago: 44, ack: 1 },
-  { insurer: "Allianz", status: "investigating", ago: 15, ack: 3 },
+  // Acknowledged after its target whatever the weekday or bank holiday: the late acknowledgement example.
+  { insurer: "Allianz", status: "investigating", ago: 15, ack: 6 },
   { insurer: "AXA", status: "pending_informal_action", ago: 4, ack: 1 },
   {
     insurer: "Lloyd's",
@@ -132,6 +133,29 @@ export function demoReferenceRows(table: DemoReferenceTable) {
 }
 
 const pick = (table: DemoReferenceTable, i: number) => demoCode(DEMO_REFERENCE[table][i % DEMO_REFERENCE[table].length]);
+
+/**
+ * Uneven spread, so the breakdowns look like real MI and not a round robin. Each list of
+ * weights adds up to 25 (one slot per demo complaint); the stride walks the slots in a fixed
+ * scrambled order, so the result is the same on every run.
+ */
+function spread(table: DemoReferenceTable, weights: number[], stride: number, i: number): string {
+  const slots = weights.flatMap((w, index) => Array<number>(w).fill(index));
+  return demoCode(DEMO_REFERENCE[table][slots[(i * stride) % slots.length]]);
+}
+
+/**
+ * Demo letter wording and FOS contact details, so letters can be sent in the sandbox.
+ * TODO(CONFIRM): placeholders; the wording to use comes verbatim from spec section 4
+ * (docs/OPEN_ITEMS.md). Loaded by the demo seed only, and only where the setting is empty.
+ */
+export const DEMO_FIRM_WORDING = {
+  fos_wording:
+    "You have the right to refer your complaint to the Financial Ombudsman Service, free of charge. You must do so within six months of the date of this letter. If you do not refer your complaint in time, the Ombudsman will not have our permission to consider it and will only be able to do so in very limited circumstances.",
+  lloyds_wording:
+    "If you remain dissatisfied, you may refer your complaint to the Complaints team at Lloyd's, who will investigate the matter and provide a final response. Lloyd's Complaints, One Lime Street, London EC3M 7HA; email complaints@lloyds.com; telephone +44 (0)20 7327 5693. Details of the Lloyd's complaints procedure are available at www.lloyds.com/complaints.",
+  fos_contact: "Financial Ombudsman Service, Exchange Tower, London E14 9SR; telephone 0800 023 4567; website www.financial-ombudsman.org.uk.",
+} as const;
 /** Demo complaints (1 based) with a vulnerable customer. */
 const VULNERABLE = new Set([5, 9, 13]);
 
@@ -240,11 +264,11 @@ export function generateDemoComplaints(today: IsoDate): DemoComplaint[] {
         complainant_email: `demo${n}@example.test`,
         // 01632 is the range Ofcom reserves for drama and examples.
         complainant_phone: i % 3 === 0 ? `01632 9600${n}` : null,
-        product: pick("ref_product", i),
-        channel: pick("ref_channel", i * 5 + 1),
-        nature_of_complaint: pick("ref_nature_of_complaint", i * 3),
-        root_cause: pick("ref_root_cause", i * 2 + 1),
-        secondary_cause: pick("ref_secondary_cause", i),
+        product: spread("ref_product", [7, 6, 3, 1, 3, 2, 2, 1], 7, i),
+        channel: spread("ref_channel", [8, 9, 4, 1, 1, 2], 9, i),
+        nature_of_complaint: spread("ref_nature_of_complaint", [8, 7, 5, 3, 2], 11, i),
+        root_cause: spread("ref_root_cause", [6, 9, 5, 3, 2], 13, i),
+        secondary_cause: spread("ref_secondary_cause", [10, 7, 5, 3], 3, i),
         vulnerable_customer: VULNERABLE.has(i + 1),
         vulnerability_category: VULNERABLE.has(i + 1) ? pick("ref_vulnerability_category", i / 4) : null,
         town: "Testtown",

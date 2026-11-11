@@ -56,7 +56,7 @@ describe("next step", () => {
     for (const v of demoViews("2026-10-30")) {
       const s = nextStep(v.complaint, v.timeline);
       expect(s.title.length).toBeGreaterThan(3);
-      if (v.timeline.rag === "red" && v.complaint.resolution_path === null) expect(s.tone).toBe("urgent");
+      if (v.timeline.acknowledgementOverdue || v.timeline.finalResponseOverdue) expect(s.tone).toBe("urgent");
     }
   });
 });

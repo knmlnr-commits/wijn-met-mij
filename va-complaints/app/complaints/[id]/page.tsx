@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Rag } from "@/components/Rag";
 import { RegulatoryClock } from "@/components/RegulatoryClock";
 import { requirePageUser } from "@/lib/auth/session";
+import { describeEvent } from "@/lib/complaints/audit";
 import { nextStep } from "@/lib/complaints/next-step";
 import { ACTION_LABELS, availableActions } from "@/lib/complaints/policy";
 import { buildView } from "@/lib/complaints/view";
@@ -236,7 +237,7 @@ function AuditTrail({ events, names }: { events: ComplaintEventRow[]; names: Map
       {[...events].reverse().map((e) => (
         <li key={e.id}>
           <div className={styles.auditHead}>
-            <strong>{e.description}</strong>
+            <strong>{describeEvent(e)}</strong>
             <span className="muted small">
               {formatDateTime(e.occurred_at)} · {e.actor_id ? (names.get(e.actor_id) ?? "Former user") : "System"}
             </span>

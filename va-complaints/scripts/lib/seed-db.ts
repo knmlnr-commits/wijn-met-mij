@@ -6,7 +6,7 @@ import type { ClientBase } from "pg";
 import type { IsoDate } from "@/lib/rules";
 import type { BankHolidaySeed } from "@/lib/holidays/govuk";
 import { BUILTIN_BANK_HOLIDAYS } from "@/lib/holidays/builtin";
-import { DEMO_REFERENCE, type DemoReferenceTable, demoReferenceRows, generateDemoComplaints } from "./demo-data";
+import { DEMO_FIRM_WORDING, DEMO_REFERENCE, type DemoReferenceTable, demoReferenceRows, generateDemoComplaints } from "./demo-data";
 
 export interface DemoUsers {
   handler: string;
@@ -30,6 +30,10 @@ export async function insertDemoComplaints(client: ClientBase, users: DemoUsers,
         await client.query(`insert into public.${table} (code, label, sort_order) values ($1, $2, $3) on conflict (code) do nothing`, [r.code, r.label, r.sort_order]);
       }
     }
+    await client.query(
+      "update public.firm_settings set fos_wording = coalesce(fos_wording, $1), lloyds_wording = coalesce(lloyds_wording, $2), fos_contact = coalesce(fos_contact, $3)",
+      [DEMO_FIRM_WORDING.fos_wording, DEMO_FIRM_WORDING.lloyds_wording, DEMO_FIRM_WORDING.fos_contact],
+    );
     for (const h of BUILTIN_BANK_HOLIDAYS) {
       await client.query("insert into public.bank_holidays (date, name, region) values ($1, $2, $3) on conflict (region, date) do nothing", [h.date, h.name, h.region]);
     }

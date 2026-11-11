@@ -65,9 +65,10 @@ function parseFilters(s: Search): DashboardFilters {
 function deadlineText(v: ComplaintView): string {
   const t = v.timeline;
   if (t.summaryResolved || t.finalResponseSent) return t.finalResponseLate ? "Answered late" : "Answered in time";
-  if (t.daysToDeadline < 0) return `${-t.daysToDeadline} days over`;
+  const days = (n: number) => `${n} ${n === 1 ? "day" : "days"}`;
+  if (t.daysToDeadline < 0) return `${days(-t.daysToDeadline)} over`;
   if (t.daysToDeadline === 0) return "Due today";
-  return `${t.daysToDeadline} days left`;
+  return `${days(t.daysToDeadline)} left`;
 }
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<Search> }) {

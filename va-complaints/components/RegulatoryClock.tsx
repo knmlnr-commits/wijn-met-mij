@@ -21,6 +21,7 @@ export function RegulatoryClock({ timeline }: { timeline: Timeline }) {
   const percent = Math.round(model.todayPosition * 1000) / 10;
   const flags: string[] = [];
   if (timeline.acknowledgementOverdue) flags.push("Acknowledgement is overdue.");
+  if (timeline.acknowledgementLate) flags.push(`The acknowledgement was sent after its target of ${formatDate(timeline.acknowledgementDue)}; this stays on the record as a breach.`);
   if (timeline.summaryEligible) flags.push(`Summary resolution is possible until ${formatDate(timeline.summaryDeadline)}.`);
   if (timeline.summaryRouteExpired) flags.push("The summary route has closed; this is now a formal complaint.");
   if (timeline.interimHoldingDue) flags.push("Week 4 reached without a holding response (prompt, not a breach).");

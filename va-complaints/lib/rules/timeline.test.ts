@@ -177,10 +177,12 @@ describe("RAG, every branch", () => {
     expect(r.rag).toBe("green");
   });
 
-  it("a late acknowledgement is recorded but is not a breach once sent", () => {
+  it("a late acknowledgement stays a breach after it is sent, also once the complaint is answered", () => {
     const r = t("2026-06-12", { acknowledgedDate: "2026-06-10" });
     expect(r.acknowledgementLate).toBe(true);
-    expect(r.rag).toBe("green");
+    expect(r.rag).toBe("red");
+    expect(t("2026-07-01", { acknowledgedDate: "2026-06-10", finalResponseDate: "2026-06-20", resolutionPath: "final_response" }).rag).toBe("red");
+    expect(t("2026-06-12", { acknowledgedDate: "2026-06-08" }).acknowledgementLate).toBe(false);
   });
 });
 

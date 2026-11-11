@@ -82,7 +82,7 @@ const vulnerabilityRule = {
 export function registerComplaintSchema(today: string = todayUtc()) {
   return z
     .object({
-      insurer_id: uuid,
+      insurer_id: z.uuid({ message: "Choose the complaint type" }),
       received_date: pastOrToday(today),
       ...detailFields(today),
       vulnerable_customer: z.boolean().default(false),

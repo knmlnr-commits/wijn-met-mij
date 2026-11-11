@@ -82,7 +82,7 @@ export default async function GuidePage() {
             <dt>
               <span className="rag rag-red">Red</span>
             </dt>
-            <dd>A deadline was missed: the acknowledgement is overdue, the final response deadline has passed, or the final response went out late.</dd>
+            <dd>A deadline was missed: the acknowledgement is overdue or went out late, the final response deadline has passed, or the final response went out late. A missed deadline stays on the record.</dd>
             <dt>
               <span className="rag rag-amber">Amber</span>
             </dt>

@@ -27,7 +27,7 @@ export const SCREEN_HELP: ScreenHelp[] = [
     tips: [
       "The five figures at the top are links: select one to see those complaints.",
       "Search finds a reference, a complainant name or a claim reference. More filters narrows by status, complaint type, handler and RAG.",
-      "Red means a deadline was missed. Amber means a deadline is close or an acknowledgement is still due. Green means on track or answered in time.",
+      "Red means a deadline was missed; it stays red even after the late step is done, so the breach remains visible. Amber means a deadline is close or an acknowledgement is still due. Green means on track or answered in time.",
     ],
   },
   {
@@ -135,6 +135,6 @@ export const PROCESS: { title: string; who: string; text: string }[] = [
   { title: "Keep the complainant informed", who: "Handler", text: "At week four the application prompts for a holding response. If the final deadline is reached, the holding response must give the right to go to the Financial Ombudsman Service." },
   { title: "Send the final response", who: "Handler", text: "Record the outcome, who it is upheld against, any compensation and the findings. The letter carries the referral rights: FOS, or Lloyd's first for a Lloyd's insurer." },
   { title: "Handle a referral", who: "Handler", text: "If the complainant goes to Lloyd's or the FOS, record the referral and later the decision and any award." },
-  { title: "Close", who: "Handler", text: "Mark compensation as paid where relevant, then close the complaint." },
+  { title: "Close", who: "Handler", text: "If compensation was agreed the complaint shows Compensation outstanding until the payment is recorded. Then close the complaint." },
   { title: "Oversee", who: "Manager and Compliance", text: "Managers maintain settings and users. Compliance has read only access to everything, including the audit trail and the reports." },
 ];

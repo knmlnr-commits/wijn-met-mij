@@ -39,7 +39,7 @@ export interface Timeline {
   /** Awaiting acknowledgement: none sent and the complaint is not yet resolved. */
   awaitingAcknowledgement: boolean;
   acknowledgementOverdue: boolean;
-  /** Acknowledgement was sent, but after the target. Recorded for MI; not a RAG breach. */
+  /** Acknowledgement was sent, but after the target. A breach that stays on the record (red). */
   acknowledgementLate: boolean;
   summaryResolved: boolean;
   summaryEligible: boolean;
@@ -104,6 +104,7 @@ export function buildTimeline(input: TimelineInput): Timeline {
 
   const rag = ragFor({
     acknowledgementOverdue,
+    acknowledgementLate,
     finalResponseOverdue,
     finalResponseLate,
     resolved,
@@ -140,6 +141,7 @@ export function buildTimeline(input: TimelineInput): Timeline {
 
 interface RagFacts {
   acknowledgementOverdue: boolean;
+  acknowledgementLate: boolean;
   finalResponseOverdue: boolean;
   finalResponseLate: boolean;
   resolved: boolean;
@@ -148,14 +150,14 @@ interface RagFacts {
 }
 
 /**
- * Red: acknowledgement overdue; final response deadline passed without a final response; or
- * final response sent after the deadline (sticky).
+ * Red: acknowledgement overdue, or sent after its target (sticky); final response deadline
+ * passed without a final response; or final response sent after the deadline (sticky).
  * Amber: inside the amber window of the final response deadline; or awaiting acknowledgement
  * but still inside target.
  * Green: on track, resolved within deadline, or summary resolved.
  */
 function ragFor(f: RagFacts): Rag {
-  if (f.finalResponseLate || f.acknowledgementOverdue || f.finalResponseOverdue) return "red";
+  if (f.finalResponseLate || f.acknowledgementLate || f.acknowledgementOverdue || f.finalResponseOverdue) return "red";
   if (f.resolved) return "green";
   if (f.insideAmberWindow || f.awaitingAcknowledgement) return "amber";
   return "green";

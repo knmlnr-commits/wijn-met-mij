@@ -48,6 +48,7 @@ describe("action policy", () => {
     const a = policy({ final_response_date: "2026-10-20", resolution_path: "final_response", status: "resolved" });
     expect(a.referFos.enabled && a.compensation.enabled && a.close.enabled).toBe(true);
     expect(a.final.reason).toBe("The complaint is already resolved.");
+    expect(a.status.reason).toBe("The complaint is resolved; its status now follows the remaining steps.");
     expect(a.referLloyds.reason).toBe("Only complaints for a Lloyd's insurer go to Lloyd's.");
   });
 
@@ -59,6 +60,12 @@ describe("action policy", () => {
     expect(a.referLloyds.reason).toBe("Referred to Lloyd's on 25-10-2026.");
     expect(a.lloydsOutcome.enabled).toBe(true);
     expect(a.fosOutcome.reason).toBe("Refer the complaint to the FOS first.");
+  });
+
+  it("a complaint with agreed compensation cannot be closed until the payment is recorded", () => {
+    const a = policy({ final_response_date: "2026-10-20", resolution_path: "final_response", status: "compensation_outstanding" });
+    expect(a.close.reason).toBe("Record the compensation payment first.");
+    expect(a.compensation.enabled).toBe(true);
   });
 
   it("compliance sees every action disabled as read only", () => {
@@ -92,7 +99,7 @@ describe("dashboard", () => {
   });
 
   it("filters by RAG, insurer, handler, status, vulnerability and search", () => {
-    expect(filterViews(views, { rag: "red" }).length).toBe(4);
+    expect(filterViews(views, { rag: "red" }).length).toBe(5);
     expect(filterViews(views, { insurerId: "ins-Aviva" }).every((v) => v.insurerName === "Aviva")).toBe(true);
     expect(filterViews(views, { handlerId: "p-manager" }).length).toBe(3);
     expect(filterViews(views, { status: "closed" }).length).toBe(3);
@@ -106,6 +113,7 @@ describe("dashboard", () => {
     expect(reasons).toContain("red: Acknowledgement overdue");
     expect(reasons).toContain("red: Final response overdue");
     expect(reasons).toContain("red: Final response sent late");
+    expect(reasons).toContain("red: Acknowledgement sent late");
     expect(reasons).toContain("green: On track");
     for (const r of reasons) if (r.startsWith("amber")) expect(["amber: Deadline close", "amber: Acknowledgement due"]).toContain(r);
   });
@@ -113,7 +121,7 @@ describe("dashboard", () => {
   it("computes the KPI tiles", () => {
     const k = kpis(views);
     expect(k.open + k.resolvedOrClosed).toBe(25);
-    expect(k.breaching).toBe(4);
+    expect(k.breaching).toBe(5);
     expect(k.dueWithin7Days).toBeGreaterThanOrEqual(1);
     expect(k.compensationOutstanding).toBe(1);
     // One definition everywhere: upheld or partially upheld, of complaints with an outcome.

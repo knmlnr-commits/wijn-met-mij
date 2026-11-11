@@ -8,7 +8,7 @@ needed to run the sandbox, a demo value is used and marked.
 | # | Item | Current handling | Owner |
 |---|---|---|---|
 | 1 | W&C vulnerability category coding | `ref_vulnerability_category` created empty | W&C |
-| 2 | Labels for complainant type codes LH and MA | Codes shown as is | W&C |
+| 2 | Labels for complainant type codes PH, LH and MA | Assumed Policyholder, Leaseholder and Managing Agent; a Manager can change the labels | W&C |
 | 3 | Is "compensation amount" the same value as the redress on the final response? | Built as one field | W&C |
 | 4 | "FOS decision" versus "Ombudsman decision" | Two fields; assumed investigator view versus final ombudsman decision | W&C |
 | 5 | Duplicate values in `Complaint_Field_Requirements.xlsx` sheet 1: "Other general admin/customer service" twice in column A; "Claim - quantum" and "Claim - delay" twice in column B | Each value seeded once | W&C |
@@ -26,7 +26,7 @@ needed to run the sandbox, a demo value is used and marked.
 | 12 | RAG colours: red, amber and green are not brand colours | Functional status colours, always shown with a text label | Brand owner |
 | 13 | Bank holidays outside the range of the gov.uk feed (the feed covers a limited number of years ahead) | Dates outside the loaded range are treated as normal business days; the Framework page will show the loaded range | Platform team |
 | 14 | FOS contact details (name, address, phone, website) | To be held as an editable firm setting, not a code constant | Compliance |
-| 15 | Acknowledgement once resolved: if a complaint is summary resolved, or gets a final response, before an acknowledgement is sent | No acknowledgement is required any more, so no acknowledgement breach; a late acknowledgement is recorded (`acknowledgementLate`) for MI but is not red | Compliance |
+| 15 | Acknowledgement once resolved: if a complaint is summary resolved, or gets a final response, before an acknowledgement is sent | No acknowledgement is required any more, so no acknowledgement breach. An acknowledgement that was sent, but after its target, stays red as a breach and is counted in Reports | Compliance |
 | 16 | Holding response wording at eight weeks: DISP 1.6 requires the delay response, with FOS rights, by the end of eight weeks | The engine flags `holdingRequiresFosRights` from the deadline day itself (build 38a7212 only added FOS wording the day after) | Compliance |
 | 17 | Retention for a complaint received on 29 February | Rolls forward to 1 March, so retention is never shortened | Compliance |
 | 18 | Closing a complaint without a final response or summary resolution (for example withdrawn) | The screen allows closing only once resolved, so the clock cannot be bypassed; a "withdrawn" route needs a W&C decision (the database function still allows it) | W&C |
@@ -46,3 +46,5 @@ needed to run the sandbox, a demo value is used and marked.
 | 32 | Demo reference values (products, channels, natures, root causes, secondary causes, vulnerability categories) | Placeholders loaded by the demo seed only (`scripts/lib/demo-data.ts`) so the sandbox breakdowns have content; replace with the lists from spec section 3 and the field requirements sheet | Koen Molenaar |
 | 33 | Built in England and Wales bank holidays 2025 to 2027 (`lib/holidays/builtin.ts`) | Compiled by hand because gov.uk is unreachable from the build environment; verify with Settings, Bank holidays, Load the latest dates from gov.uk | Platform team |
 | 34 | Compensation outstanding and RAG | RAG stays the regulatory status (green when answered in time); unpaid compensation is shown as a separate amber flag, a dashboard figure and under Needs attention | Compliance |
+| 35 | Demo letter wording (FOS and Lloyd's referral paragraphs, FOS contact details) | Placeholders loaded by the demo seed so letters can be sent in the sandbox; replace with the verbatim wording from spec section 4 before real use | Compliance |
+| 36 | Status when compensation is agreed | The final response sets Compensation outstanding (not Resolved) until the payment is recorded; closing is blocked until then | W&C |

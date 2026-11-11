@@ -97,6 +97,7 @@ export function kpis(views: ComplaintView[]): Kpis {
 /** Why a complaint has its RAG colour, in a few words; shown under the chip so red never looks like a bug. */
 export function ragReason(t: Timeline): string {
   if (t.finalResponseLate) return "Final response sent late";
+  if (t.acknowledgementLate && !t.finalResponseOverdue) return "Acknowledgement sent late";
   if (t.acknowledgementOverdue) return "Acknowledgement overdue";
   if (t.finalResponseOverdue) return "Final response overdue";
   if (t.summaryResolved) return "Summary resolved";

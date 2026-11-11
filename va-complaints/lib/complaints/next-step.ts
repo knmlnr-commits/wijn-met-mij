@@ -46,7 +46,7 @@ export function nextStep(c: StepComplaint, t: Timeline): NextStep {
       return { tone: "soon", title: "Complete the actions from the decision, then close", detail: null, action: "close" };
     }
     if (c.status === "compensation_outstanding") {
-      return { tone: "soon", title: "Pay the compensation, then mark it paid", detail: null, action: "compensation" };
+      return { tone: "soon", title: "Record the compensation payment", detail: "Compensation was agreed; mark it paid once it has been paid, then close the complaint.", action: "compensation" };
     }
     return {
       tone: "normal",

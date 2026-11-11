@@ -82,7 +82,8 @@ function decide(input: PolicyInput, key: ActionKey): string | null {
       if (closed) return "The complaint is closed.";
       return null;
     case "status":
-      return closed ? "The complaint is closed." : null;
+      if (closed) return "The complaint is closed.";
+      return resolved ? "The complaint is resolved; its status now follows the remaining steps." : null;
     case "holding":
       if (resolved) return "The complaint is resolved; a holding response is no longer needed.";
       return closed ? "The complaint is closed." : null;
@@ -113,6 +114,7 @@ function decide(input: PolicyInput, key: ActionKey): string | null {
       return resolved ? null : "Resolve the complaint first.";
     case "close":
       if (closed) return `Closed on ${formatDate(c.closed_date)}.`;
+      if (c.status === "compensation_outstanding") return "Record the compensation payment first.";
       // Open item 18: closing without a resolution (for example withdrawn) awaits W&C.
       return resolved ? null : "Send a final response or record a summary resolution first.";
   }

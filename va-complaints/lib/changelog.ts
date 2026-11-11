@@ -1,5 +1,5 @@
 /** Release notes shown on the What's new page. Newest first. Keep APP_VERSION equal to the first entry. */
-export const APP_VERSION = "0.6.2";
+export const APP_VERSION = "0.6.3";
 
 export interface Release {
   version: string;
@@ -9,6 +9,20 @@ export interface Release {
 }
 
 export const CHANGELOG: Release[] = [
+  {
+    version: "0.6.3",
+    date: "11-11-2026",
+    title: "Fixes from the second test run",
+    changes: [
+      "Demo letter wording for the FOS and Lloyd's referral rights and the FOS contact details, so letters can be sent in the sandbox.",
+      "A late acknowledgement stays red as a breach, with its reason, and is counted in Reports.",
+      "Agreed compensation: the complaint shows Compensation outstanding until the payment is recorded, and cannot be closed before that.",
+      "The status can no longer be changed by hand once a complaint is resolved.",
+      "Audit trail: recording a step and sending its letter are worded differently, letter entries name the letter, and an unchanged draft no longer logs an edit.",
+      "Clearer validation message for a missing complaint type; correct singular for 1 day; full labels for complainant types.",
+      "Demo data with a more realistic spread across products, natures and root causes.",
+    ],
+  },
   {
     version: "0.6.2",
     date: "11-11-2026",

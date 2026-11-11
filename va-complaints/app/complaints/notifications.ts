@@ -35,6 +35,13 @@ const draftSchema = z.object({
     .transform((v) => v ?? null),
 });
 
+type Draft = { channel: string; content: string; recipientEmail: string | null };
+
+function changed(current: { channel: string; rendered_content: string; recipient_email: string | null }, draft: Draft): boolean {
+  const norm = (text: string) => text.replace(/\r\n/g, "\n").trim();
+  return current.channel !== draft.channel || norm(current.rendered_content) !== norm(draft.content) || (current.recipient_email ?? null) !== draft.recipientEmail;
+}
+
 function refresh(complaintId: string) {
   revalidatePath(`/complaints/${complaintId}`);
 }
@@ -60,7 +67,9 @@ export async function saveNotificationAction(_prev: ActionResult, form: FormData
   try {
     await requireRole(...WRITERS);
     const db = await createUserClient();
-    complaintId = (await getNotification(db, notificationId)).complaint_id;
+    const current = await getNotification(db, notificationId);
+    complaintId = current.complaint_id;
+    if (!changed(current, draft)) return { ok: true, message: "No changes to save." };
     await updateNotificationDraft(db, notificationId, draft);
   } catch (error) {
     return failure(error);
@@ -86,7 +95,8 @@ export async function sendNotificationAction(_prev: ActionResult, form: FormData
     const current = await getNotification(db, notificationId);
     complaintId = current.complaint_id;
     if (current.status === "sent") throw new PolicyError("This notification has already been sent.");
-    await updateNotificationDraft(db, notificationId, draft);
+    // An unchanged draft is sent as it is; only a real edit is written to the audit trail.
+    if (changed(current, draft)) await updateNotificationDraft(db, notificationId, draft);
     if (draft.channel === "email") {
       const { subject, text } = splitStoredLetter(draft.content);
       delivered = (await getEmailProvider().send({ to: draft.recipientEmail as string, subject, text })).ok;

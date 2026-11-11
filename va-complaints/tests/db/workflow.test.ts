@@ -169,7 +169,8 @@ describe.skipIf(!dbTestsEnabled)("workflow functions", () => {
         expect((await t.fails("select public.record_final_response($1, '2026-10-10', 'upheld', 'firm', 150.00)", [id])).message).toMatch(/paid by/);
         await t.query("select public.record_final_response($1, '2026-10-10', 'upheld', 'firm', 150.00, 'firm', 'Synthetic findings')", [id]);
         const c = await complaint(t, id);
-        expect(c).toMatchObject({ status: "resolved", resolution_path: "final_response", outcome: "upheld", upheld_against: "firm", compensation_amount: "150.00" });
+        // Compensation was agreed, so the complaint waits for the payment to be recorded.
+        expect(c).toMatchObject({ status: "compensation_outstanding", resolution_path: "final_response", outcome: "upheld", upheld_against: "firm", compensation_amount: "150.00" });
         expect((await events(t, id)).at(-1)?.event_type).toBe("final_response_sent");
       }));
 
@@ -187,6 +188,14 @@ describe.skipIf(!dbTestsEnabled)("workflow functions", () => {
         await t.as(USERS.handler);
         expect((await t.fails("select public.record_final_response($1, '2026-10-10', 'not_upheld')", [b])).message).toMatch(/already resolved/);
         expect((await t.fails("select public.record_holding_response($1, '2026-10-10')", [b])).message).toMatch(/already resolved/);
+      }));
+
+    it("the status cannot be set by hand once the complaint is resolved", () =>
+      tx(db.pool, async (t) => {
+        const id = await register(t, USERS.handler);
+        await t.as(USERS.handler);
+        await t.query("select public.record_final_response($1, '2026-10-10', 'not_upheld')", [id]);
+        expect((await t.fails("select public.set_complaint_status($1, 'investigating')", [id])).message).toMatch(/resolved/);
       }));
 
     it("compensation status needs a resolved complaint", () =>

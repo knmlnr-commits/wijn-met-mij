@@ -50,7 +50,7 @@ export default async function FrameworkPage() {
           </table>
         </div>
         <ul className="small muted">
-          <li>Red: acknowledgement overdue; final response deadline passed without a final response; or final response sent after the deadline.</li>
+          <li>Red: acknowledgement overdue or sent after its target; final response deadline passed without a final response; or final response sent after the deadline. A late acknowledgement or final response stays red.</li>
           <li>Amber: inside the amber window before the final response deadline; or awaiting acknowledgement but still inside target.</li>
           <li>Green: on track, resolved within the deadline, or resolved by summary resolution.</li>
           <li>Flagged but not a breach: week 4 reached without a holding response; summary route expired after business day 3.</li>

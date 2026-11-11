@@ -19,13 +19,14 @@ values
   ('Zurich', false, 1, 3, 28, 56, 182, 3)
 on conflict (name) do nothing;
 
--- Complainant types from the build prompt. TODO(CONFIRM): labels for LH and MA (open item 2).
+-- Complainant types from the build prompt. TODO(CONFIRM): PH, LH and MA are assumed to mean
+-- Policyholder, Leaseholder and Managing Agent (open item 2); a Manager can change the labels.
 insert into public.ref_complainant_type (code, label, sort_order)
 values
   ('BROKER', 'Broker', 10),
-  ('PH', 'PH', 20),
-  ('LH', 'LH', 30),
-  ('MA', 'MA', 40),
+  ('PH', 'Policyholder', 20),
+  ('LH', 'Leaseholder', 30),
+  ('MA', 'Managing Agent', 40),
   ('TENANT', 'Tenant', 50),
   ('ASSESSOR', 'Assessor', 60),
   ('SOLICITOR', 'Solicitor', 70),

@@ -3,7 +3,7 @@
 Internal tool for complaint handlers to register, investigate, track and resolve insurance
 complaints within the UK FCA DISP timeline and the Lloyd's complaints procedure.
 
-Status: release candidate, version 0.6.2 (see `lib/changelog.ts` or What's new in the app).
+Status: release candidate, version 0.6.3 (see `lib/changelog.ts` or What's new in the app).
 
 | Document | For |
 |---|---|
