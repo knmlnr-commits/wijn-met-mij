@@ -39,7 +39,16 @@ export async function createTestDatabase(): Promise<TestDatabase> {
   const name = `va_test_${process.pid}_${Math.random().toString(36).slice(2, 8)}`;
   const admin = new Client({ connectionString: ADMIN_URL });
   await admin.connect();
-  await admin.query(`create database ${name}`);
+  // Test files run in parallel; Postgres refuses to copy template1 while another copy is running.
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await admin.query(`create database ${name}`);
+      break;
+    } catch (error) {
+      if ((error as DatabaseError).code !== "55006" || attempt >= 20) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 150 * attempt));
+    }
+  }
   await admin.end();
 
   const url = new URL(ADMIN_URL);
