@@ -1,5 +1,5 @@
 /** Release notes shown on the What's new page. Newest first. Keep APP_VERSION equal to the first entry. */
-export const APP_VERSION = "0.7.0";
+export const APP_VERSION = "0.7.1";
 
 export interface Release {
   version: string;
@@ -9,6 +9,15 @@ export interface Release {
 }
 
 export const CHANGELOG: Release[] = [
+  {
+    version: "0.7.1",
+    date: "11-11-2026",
+    title: "Letters as PDF",
+    changes: [
+      "Download PDF on every letter: on the printable letter page and, for sent letters and emails, under Letters and emails on the complaint.",
+      "The PDF holds exactly the stored text on A4; a draft is marked as not yet issued on every page. The file name carries the letter type and date, no personal data.",
+    ],
+  },
   {
     version: "0.7.0",
     date: "11-11-2026",

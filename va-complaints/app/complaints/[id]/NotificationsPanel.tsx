@@ -85,13 +85,16 @@ export function NotificationsPanel({ complaintId, notifications, canWrite }: { c
           {n.status === "sent" ? (
             <div className="stack">
               <pre className={styles.letterView}>{n.rendered_content}</pre>
-              {n.channel === "letter" && (
-                <p>
+              <p className="button-row">
+                {n.channel === "letter" && (
                   <Link href={`/complaints/${complaintId}/letters/${n.id}`} target="_blank">
                     Open printable letter
                   </Link>
-                </p>
-              )}
+                )}
+                <a href={`/complaints/${complaintId}/letters/${n.id}/pdf`} download>
+                  Download PDF
+                </a>
+              </p>
             </div>
           ) : (
             <DraftEditor n={n} canWrite={canWrite} />

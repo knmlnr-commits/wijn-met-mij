@@ -32,6 +32,9 @@ export default async function LetterPage({ params }: { params: Promise<{ id: str
     <article className={styles.page}>
       <div className={styles.toolbar}>
         <PrintButton />
+        <a className="button-secondary" href={`/complaints/${id}/letters/${nid}/pdf`} download>
+          Download PDF
+        </a>
         {n.status !== "sent" && <span className="badge badge-rose">Draft, not yet issued</span>}
       </div>
       <pre className={styles.letter}>{text}</pre>
