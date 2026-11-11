@@ -39,7 +39,7 @@ const STEPS: Step[] = [
 ];
 
 /**
- * The process at a glance: the main path left to right, side routes underneath. Deadlines come
+ * The process at a glance: numbered points on one line, side routes underneath. Deadlines come
  * from the rules engine defaults. Stacks vertically on phones.
  */
 export function ProcessFlow() {
@@ -48,12 +48,12 @@ export function ProcessFlow() {
       <ol className={styles.flow}>
         {STEPS.map((s) => (
           <li key={s.n} className={styles.col}>
-            <div className={styles.when}>{s.when}</div>
-            <div className={styles.step}>
+            <div className={styles.node}>
               <span className={styles.number}>{s.n}</span>
-              <strong className={styles.title}>{s.title}</strong>
-              <span className={styles.text}>{s.text}</span>
             </div>
+            <div className={styles.when}>{s.when}</div>
+            <strong className={styles.title}>{s.title}</strong>
+            <span className={styles.text}>{s.text}</span>
             {s.branch && (
               <div className={styles.branch}>
                 <strong>{s.branch.title}</strong>

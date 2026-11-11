@@ -4,12 +4,12 @@
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   margin: 0;
-  padding: 20px;
+  padding: 24px 24px 18px;
 }
 
 .flow {
   display: grid;
-  gap: 28px;
+  gap: 0 20px;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   list-style: none;
   margin: 0;
@@ -19,117 +19,109 @@
 .col {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   position: relative;
 }
 
-.when {
-  color: var(--va-navy);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-
-.step {
-  background: var(--va-navy);
-  border-radius: var(--radius);
-  color: var(--va-white);
+/* The line: each point draws its segment to the next one. */
+.node {
+  align-items: center;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-height: 150px;
-  padding: 14px;
+  height: 36px;
+  margin-bottom: 8px;
   position: relative;
 }
 
-/* Arrow to the next step. */
-.col:not(:last-child) .step::after {
-  border-bottom: 10px solid transparent;
-  border-left: 14px solid var(--va-turquoise);
-  border-top: 10px solid transparent;
+.col:not(:last-child) .node::after {
+  background: var(--va-turquoise);
   content: "";
+  height: 4px;
+  left: 36px;
   position: absolute;
-  right: -22px;
-  top: calc(50% - 10px);
+  right: -20px;
+  top: 16px;
 }
 
 .number {
   align-items: center;
-  background: var(--va-turquoise);
+  background: var(--va-navy);
   border-radius: 50%;
-  color: var(--va-navy);
+  color: var(--va-white);
   display: flex;
   font-family: var(--font-heading);
   font-weight: 700;
-  height: 28px;
+  height: 36px;
   justify-content: center;
-  width: 28px;
+  position: relative;
+  width: 36px;
+  z-index: 1;
+}
+
+.when {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 .title {
+  color: var(--va-navy);
   font-family: var(--font-heading);
   font-size: 1.1rem;
 }
 
 .text {
+  color: var(--text);
   font-size: 0.8rem;
-  line-height: 1.4;
+  line-height: 1.45;
+  padding-right: 8px;
 }
 
 .branch {
-  background: var(--va-misty-rose);
-  border-radius: var(--radius);
-  color: var(--grey-900);
+  border-left: 3px solid var(--va-misty-rose);
+  color: var(--text-muted);
   display: flex;
   flex-direction: column;
-  font-size: 0.8rem;
-  gap: 4px;
+  font-size: 0.78rem;
+  gap: 2px;
   line-height: 1.4;
-  margin-top: 14px;
-  padding: 12px;
-  position: relative;
-}
-
-/* Dotted connector from the step to its side route. */
-.branch::before {
-  border-left: 2px dotted var(--va-navy);
-  content: "";
-  height: 22px;
-  left: 24px;
-  position: absolute;
-  top: -22px;
+  margin-top: 12px;
+  padding: 2px 8px 2px 10px;
 }
 
 .branch strong {
   color: var(--va-navy);
-  font-family: var(--font-heading);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 .caption {
+  border-top: 1px solid var(--grey-100);
   color: var(--text-muted);
   display: flex;
   flex-wrap: wrap;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   gap: 6px 20px;
   margin-top: 18px;
+  padding-top: 12px;
 }
 
 .key {
-  border-radius: 3px;
   display: inline-block;
-  height: 10px;
   margin-right: 4px;
-  width: 18px;
+  vertical-align: middle;
 }
 
 .keyMain {
   background: var(--va-navy);
+  border-radius: 50%;
+  height: 10px;
+  width: 10px;
 }
 
 .keyBranch {
   background: var(--va-misty-rose);
+  height: 12px;
+  width: 3px;
 }
 
 @media (max-width: 900px) {
@@ -137,39 +129,29 @@
     grid-template-columns: 1fr;
   }
 
-  .step {
-    min-height: 0;
+  .col {
+    padding: 0 0 22px 52px;
   }
 
-  .col:not(:last-child) .step::after {
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-top: 14px solid var(--va-turquoise);
-    border-bottom: none;
-    bottom: -20px;
-    left: 24px;
+  .node {
+    height: auto;
+    left: 0;
+    margin: 0;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+  }
+
+  .node {
+    align-items: flex-start;
+  }
+
+  .col:not(:last-child) .node::after {
+    bottom: 0;
+    height: auto;
+    left: 16px;
     right: auto;
-    top: auto;
-  }
-
-  .branch {
-    margin-left: 48px;
-    margin-top: 0;
-  }
-
-  .branch::before {
-    border-left: none;
-    border-top: 2px dotted var(--va-navy);
-    height: 0;
-    left: -24px;
-    top: 18px;
-    width: 24px;
-  }
-}
-
-@media print {
-  .step {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    top: 36px;
+    width: 4px;
   }
 }
