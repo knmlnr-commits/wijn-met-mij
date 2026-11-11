@@ -69,12 +69,16 @@ export default async function SettingsPage() {
           allows is saved but flagged.
         </p>
         {insurers.map((i) => {
-          const warnings = profileWarnings(slaProfileFor(i, firm));
+          const profile = slaProfileFor(i, firm);
+          const warnings = profileWarnings(profile);
           return (
             <details key={i.id} className="card">
               <summary>
                 <strong>{i.name}</strong> {i.is_lloyds && <span className="badge">Lloyd&apos;s</span>} {!i.is_active && <span className="badge">Inactive</span>}{" "}
-                {warnings.length > 0 && <span className="badge badge-rose">Beyond FCA limits</span>}
+                {warnings.length > 0 && <span className="badge badge-rose">Beyond FCA limits</span>}{" "}
+                <span className="muted small">
+                  Acknowledge {profile.ackBusinessDays} business days · Final response {profile.finalResponseDays} days · Keep {profile.retentionYears} years
+                </span>
               </summary>
               {warnings.length > 0 && (
                 <ul className="notice notice-warn small">

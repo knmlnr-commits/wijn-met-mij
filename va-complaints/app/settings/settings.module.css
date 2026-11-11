@@ -1,0 +1,25 @@
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tabs a {
+  background: var(--va-white);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--va-navy);
+  padding: 7px 14px;
+  text-decoration: none;
+}
+
+.tabs a.active {
+  background: var(--va-navy);
+  border-color: var(--va-navy);
+  color: var(--va-white);
+}
+
+.tabs a:focus-visible {
+  outline: 3px solid var(--va-turquoise);
+  outline-offset: 1px;
+}

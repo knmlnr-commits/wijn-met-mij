@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { Rag } from "@/components/Rag";
 import { RegulatoryClock } from "@/components/RegulatoryClock";
 import { requirePageUser } from "@/lib/auth/session";
-import { availableActions } from "@/lib/complaints/policy";
+import { nextStep } from "@/lib/complaints/next-step";
+import { ACTION_LABELS, availableActions } from "@/lib/complaints/policy";
 import { buildView } from "@/lib/complaints/view";
 import { createUserClient } from "@/lib/db/client";
 import { getComplaint, listEvents, listNotifications } from "@/lib/db/complaints";
@@ -47,6 +48,9 @@ export default async function ComplaintPage({ params }: { params: Promise<{ id: 
   });
   const editable = actions.find((a) => a.key === "edit")?.enabled ?? false;
   const options = (rows: { code: string; label: string; is_active: boolean }[]) => rows.map((r) => ({ value: r.code, label: r.is_active ? r.label : `${r.label} (inactive)` }));
+  const step = nextStep(complaint, view.timeline);
+  const stepAction = step.action && actions.find((a) => a.key === step.action)?.enabled ? step.action : null;
+  const readOnly = user.role === "compliance";
   const names = new Map(ctx.profiles.map((p) => [p.id, p.display_name]));
 
   return (
@@ -59,6 +63,10 @@ export default async function ComplaintPage({ params }: { params: Promise<{ id: 
           <h1>
             {complaint.reference} <span className="muted">{complaint.complainant_name}</span>
           </h1>
+          <p className={styles.subline}>
+            {view.insurerName}
+            {view.insurer?.is_lloyds ? " (Lloyd's procedure)" : ""} · Handler {view.handlerName} · Received {formatDate(complaint.received_date)}
+          </p>
         </div>
         <div className="button-row">
           <span className="badge">{STATUS_LABELS[complaint.status]}</span>
@@ -68,41 +76,63 @@ export default async function ComplaintPage({ params }: { params: Promise<{ id: 
         </div>
       </div>
 
+      <section className={`${styles.banner} ${styles[step.tone]}`} aria-label="Next step">
+        <div>
+          <div className={styles.bannerLabel}>{step.tone === "done" ? "Status" : "Next step"}</div>
+          <div className={styles.bannerTitle}>{step.title}</div>
+          {step.detail && <div className="small muted">{step.detail}</div>}
+        </div>
+        {stepAction && !readOnly && (
+          <a href="#actions" className="button-primary">
+            {ACTION_LABELS[stepAction]}
+          </a>
+        )}
+      </section>
+
       <RegulatoryClock timeline={view.timeline} />
 
       <div className={styles.columns}>
-        <ActionsPanel
-          complaintId={complaint.id}
-          today={today}
-          actions={actions}
-          firmShortName={ctx.firm?.firm_short_name ?? "Firm"}
-          holdingRequiresFosRights={view.timeline.holdingRequiresFosRights}
-        />
-        <Details complaint={complaint} ctx={ctx} insurerName={view.insurerName} handlerName={view.handlerName} isLloyds={view.insurer?.is_lloyds ?? false} />
-      </div>
-
-      {editable && (
-        <details className="card">
-          <summary className={styles.summaryHeading}>Edit details</summary>
-          <EditDetails
-            complaint={complaint}
+        {readOnly ? (
+          <section className="card stack" aria-label="Actions">
+            <h2>Actions</h2>
+            <p className="muted">Compliance has read only access: you can see everything on this complaint, including the audit trail, but not change it.</p>
+          </section>
+        ) : (
+          <ActionsPanel
+            complaintId={complaint.id}
             today={today}
-            handlers={ctx.profiles.filter((p) => p.is_active && p.role !== "compliance").map((p) => ({ value: p.id, label: p.display_name }))}
-            coverholders={ctx.coverholders.map((c) => ({ value: c.id, label: c.is_active ? c.name : `${c.name} (inactive)` }))}
-            lists={{
-              complainantType: options(ctx.refs.ref_complainant_type),
-              product: options(ctx.refs.ref_product),
-              channel: options(ctx.refs.ref_channel),
-              nature: options(ctx.refs.ref_nature_of_complaint),
-              rootCause: options(ctx.refs.ref_root_cause),
-              secondaryCause: options(ctx.refs.ref_secondary_cause),
-              vulnerability: options(ctx.refs.ref_vulnerability_category),
-            }}
+            actions={actions}
+            firmShortName={ctx.firm?.firm_short_name ?? "Firm"}
+            holdingRequiresFosRights={view.timeline.holdingRequiresFosRights}
+            recommended={stepAction}
           />
-        </details>
-      )}
-
-      <NotificationsPanel complaintId={complaint.id} notifications={notifications} canWrite={editable && user.role !== "compliance"} />
+        )}
+        <div className={styles.side}>
+          <NotificationsPanel complaintId={complaint.id} notifications={notifications} canWrite={editable && !readOnly} />
+          <Details complaint={complaint} ctx={ctx} isLloyds={view.insurer?.is_lloyds ?? false}>
+            {editable && (
+              <details>
+                <summary className={styles.editToggle}>Edit details</summary>
+                <EditDetails
+                  complaint={complaint}
+                  today={today}
+                  handlers={ctx.profiles.filter((p) => p.is_active && p.role !== "compliance").map((p) => ({ value: p.id, label: p.display_name }))}
+                  coverholders={ctx.coverholders.map((c) => ({ value: c.id, label: c.is_active ? c.name : `${c.name} (inactive)` }))}
+                  lists={{
+                    complainantType: options(ctx.refs.ref_complainant_type),
+                    product: options(ctx.refs.ref_product),
+                    channel: options(ctx.refs.ref_channel),
+                    nature: options(ctx.refs.ref_nature_of_complaint),
+                    rootCause: options(ctx.refs.ref_root_cause),
+                    secondaryCause: options(ctx.refs.ref_secondary_cause),
+                    vulnerability: options(ctx.refs.ref_vulnerability_category),
+                  }}
+                />
+              </details>
+            )}
+          </Details>
+        </div>
+      </div>
 
       <section className="card stack" aria-labelledby="audit-heading">
         <h2 id="audit-heading">Audit trail</h2>
@@ -112,106 +142,88 @@ export default async function ComplaintPage({ params }: { params: Promise<{ id: 
   );
 }
 
-function Details({ complaint: c, ctx, insurerName, handlerName, isLloyds }: { complaint: ComplaintRow; ctx: AppContext; insurerName: string; handlerName: string; isLloyds: boolean }) {
-  const coverholder = ctx.coverholders.find((h) => h.id === c.coverholder_id)?.name ?? "Not set";
-  const address = [c.address_line1, c.address_line2, c.town, c.county, c.postcode, c.country].filter(Boolean).join(", ") || "Not set";
-  const party = (p: string | null) => (p === "firm" ? (ctx.firm?.firm_short_name ?? "Firm") : p === "insurer" ? "Insurer" : "Not set");
-  const yesNo = (v: boolean | null) => (v === null ? "Not set" : v ? "Yes" : "No");
+type Item = [label: string, value: string | null];
+
+function Group({ title, items }: { title: string; items: Item[] }) {
+  const filled = items.filter(([, v]) => v !== null && v !== "");
+  if (filled.length === 0) return null;
+  return (
+    <>
+      <h3>{title}</h3>
+      <dl className="meta">
+        {filled.map(([label, value]) => (
+          <div key={label} style={{ display: "contents" }}>
+            <dt>{label}</dt>
+            <dd className={label === "Summary" || label === "Findings" ? styles.prose : undefined}>{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </>
+  );
+}
+
+/** Shows what has been recorded; fields without a value are listed in one line instead of row by row. */
+function Details({ complaint: c, ctx, isLloyds, children }: { complaint: ComplaintRow; ctx: AppContext; isLloyds: boolean; children?: React.ReactNode }) {
+  const ref = (table: Parameters<typeof refLabel>[1], code: string | null) => (code ? refLabel(ctx, table, code) : null);
+  const party = (p: string | null) => (p === "firm" ? (ctx.firm?.firm_short_name ?? "Firm") : p === "insurer" ? "Insurer" : null);
+  const yesNo = (v: boolean | null) => (v === null ? null : v ? "Yes" : "No");
+  const date = (d: string | null) => (d ? formatDate(d) : null);
+  const money = (n: number | null) => (n === null ? null : formatGBP(n));
+  const address = [c.address_line1, c.address_line2, c.town, c.county, c.postcode, c.country].filter(Boolean).join(", ") || null;
+
+  const complaint: Item[] = [
+    ["Summary", c.summary],
+    ["Findings", c.findings],
+    ["Received into complaints", date(c.received_into_complaints_date)],
+    ["Vulnerability", c.vulnerable_customer ? (ref("ref_vulnerability_category", c.vulnerability_category) ?? "Yes") : null],
+  ];
+  const complainant: Item[] = [
+    ["Type", ref("ref_complainant_type", c.complainant_type)],
+    ["Email", c.complainant_email],
+    ["Phone", c.complainant_phone],
+    ["Address", address],
+  ];
+  const classification: Item[] = [
+    ["Coverholder", ctx.coverholders.find((h) => h.id === c.coverholder_id)?.name ?? null],
+    ["Product", ref("ref_product", c.product)],
+    ["Channel", ref("ref_channel", c.channel)],
+    ["Claim related", yesNo(c.claim_related)],
+    ["Claim reference", c.claim_reference],
+    ["Insurer reference", c.insurer_complaint_reference],
+    ["Eligibility", c.eligibility ? ELIGIBILITY_LABELS[c.eligibility] : null],
+    ["Nature", ref("ref_nature_of_complaint", c.nature_of_complaint)],
+    ["Root cause", ref("ref_root_cause", c.root_cause)],
+    ["Secondary cause", ref("ref_secondary_cause", c.secondary_cause)],
+  ];
+  const outcome: Item[] = [
+    ["Acknowledged", date(c.acknowledged_date)],
+    ["Holding response", date(c.holding_response_date)],
+    ["Resolution", c.resolution_path ? RESOLUTION_PATH_LABELS[c.resolution_path] : null],
+    ["Final response", date(c.final_response_date)],
+    ["Outcome", c.outcome ? OUTCOME_LABELS[c.outcome] : null],
+    ["Upheld against", party(c.upheld_against)],
+    ["Compensation", c.compensation_amount === null ? null : `${formatGBP(c.compensation_amount)}${c.compensation_paid_by ? `, paid by ${party(c.compensation_paid_by)}` : ""}`],
+    [isLloyds ? "Referred to Lloyd's" : "", date(c.lloyds_referred_date)],
+    ["Referred to FOS", date(c.fos_referred_date)],
+    ["FOS / Lloyd's reference", c.fos_lloyds_reference],
+    ["Lloyd's outcome", c.lloyds_outcome ? `${c.lloyds_outcome}${c.lloyds_closed_date ? `, closed ${formatDate(c.lloyds_closed_date)}` : ""}` : null],
+    ["FOS decision", c.fos_decision ? `${c.fos_decision}${c.fos_closed_date ? `, closed ${formatDate(c.fos_closed_date)}` : ""}` : null],
+    ["Ombudsman decision", c.ombudsman_decision],
+    ["Awarded after FOS", money(c.compensation_awarded_after_fos)],
+    ["Awarded after Lloyd's", money(c.compensation_awarded_after_lloyds)],
+    ["Closed", date(c.closed_date)],
+  ];
+  const empty = [...complainant, ...classification].filter(([l, v]) => l && (v === null || v === "")).map(([l]) => l);
 
   return (
     <section className="card stack" aria-label="Complaint details">
       <h2>Details</h2>
-      <dl className="meta">
-        <dt>Complaint type</dt>
-        <dd>
-          {insurerName}
-          {isLloyds ? " (Lloyd's)" : ""}
-        </dd>
-        <dt>Handler</dt>
-        <dd>{handlerName}</dd>
-        <dt>Received</dt>
-        <dd>{formatDate(c.received_date)}</dd>
-        <dt>Into complaints</dt>
-        <dd>{formatDate(c.received_into_complaints_date)}</dd>
-        <dt>Complainant type</dt>
-        <dd>{refLabel(ctx, "ref_complainant_type", c.complainant_type)}</dd>
-        <dt>Email</dt>
-        <dd>{c.complainant_email ?? "Not set"}</dd>
-        <dt>Phone</dt>
-        <dd>{c.complainant_phone ?? "Not set"}</dd>
-        <dt>Address</dt>
-        <dd>{address}</dd>
-        <dt>Coverholder</dt>
-        <dd>{coverholder}</dd>
-        <dt>Product</dt>
-        <dd>{refLabel(ctx, "ref_product", c.product)}</dd>
-        <dt>Channel</dt>
-        <dd>{refLabel(ctx, "ref_channel", c.channel)}</dd>
-        <dt>Claim related</dt>
-        <dd>{yesNo(c.claim_related)}</dd>
-        <dt>Claim reference</dt>
-        <dd>{c.claim_reference ?? "Not set"}</dd>
-        <dt>Insurer reference</dt>
-        <dd>{c.insurer_complaint_reference ?? "Not set"}</dd>
-        <dt>Eligibility</dt>
-        <dd>{c.eligibility ? ELIGIBILITY_LABELS[c.eligibility] : "Not set"}</dd>
-        <dt>Nature</dt>
-        <dd>{refLabel(ctx, "ref_nature_of_complaint", c.nature_of_complaint)}</dd>
-        <dt>Root cause</dt>
-        <dd>{refLabel(ctx, "ref_root_cause", c.root_cause)}</dd>
-        <dt>Secondary cause</dt>
-        <dd>{refLabel(ctx, "ref_secondary_cause", c.secondary_cause)}</dd>
-        <dt>Vulnerability</dt>
-        <dd>{c.vulnerable_customer ? refLabel(ctx, "ref_vulnerability_category", c.vulnerability_category) : "No"}</dd>
-        <dt>Summary</dt>
-        <dd className={styles.prose}>{c.summary}</dd>
-        <dt>Findings</dt>
-        <dd className={styles.prose}>{c.findings ?? "Not set"}</dd>
-      </dl>
-      <h3>Lifecycle</h3>
-      <dl className="meta">
-        <dt>Acknowledged</dt>
-        <dd>{formatDate(c.acknowledged_date)}</dd>
-        <dt>Holding response</dt>
-        <dd>{formatDate(c.holding_response_date)}</dd>
-        <dt>Resolution</dt>
-        <dd>{c.resolution_path ? RESOLUTION_PATH_LABELS[c.resolution_path] : "Not resolved"}</dd>
-        <dt>Final response</dt>
-        <dd>{formatDate(c.final_response_date)}</dd>
-        <dt>Outcome</dt>
-        <dd>{c.outcome ? OUTCOME_LABELS[c.outcome] : "Not set"}</dd>
-        <dt>Upheld against</dt>
-        <dd>{party(c.upheld_against)}</dd>
-        <dt>Compensation</dt>
-        <dd>
-          {formatGBP(c.compensation_amount)}
-          {c.compensation_paid_by ? `, paid by ${party(c.compensation_paid_by)}` : ""}
-        </dd>
-        <dt>Referred to Lloyd&apos;s</dt>
-        <dd>{formatDate(c.lloyds_referred_date)}</dd>
-        <dt>Referred to FOS</dt>
-        <dd>{formatDate(c.fos_referred_date)}</dd>
-        <dt>FOS / Lloyd&apos;s reference</dt>
-        <dd>{c.fos_lloyds_reference ?? "Not set"}</dd>
-        <dt>Lloyd&apos;s outcome</dt>
-        <dd>
-          {c.lloyds_outcome ?? "Not set"}
-          {c.lloyds_closed_date ? `, closed ${formatDate(c.lloyds_closed_date)}` : ""}
-        </dd>
-        <dt>FOS decision</dt>
-        <dd>{c.fos_decision ?? "Not set"}</dd>
-        <dt>Ombudsman decision</dt>
-        <dd>
-          {c.ombudsman_decision ?? "Not set"}
-          {c.fos_closed_date ? `, closed ${formatDate(c.fos_closed_date)}` : ""}
-        </dd>
-        <dt>Awarded after FOS</dt>
-        <dd>{formatGBP(c.compensation_awarded_after_fos)}</dd>
-        <dt>Awarded after Lloyd&apos;s</dt>
-        <dd>{formatGBP(c.compensation_awarded_after_lloyds)}</dd>
-        <dt>Closed</dt>
-        <dd>{formatDate(c.closed_date)}</dd>
-      </dl>
+      <Group title="Complaint" items={complaint} />
+      <Group title="Complainant" items={complainant} />
+      <Group title="Classification" items={classification} />
+      <Group title="Progress and outcome" items={outcome.filter(([l]) => l)} />
+      {empty.length > 0 && <p className="small muted">Not recorded yet: {empty.join(", ")}.</p>}
+      {children}
     </section>
   );
 }

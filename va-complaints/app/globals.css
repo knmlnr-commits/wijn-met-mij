@@ -130,6 +130,7 @@ textarea {
   color: var(--va-white);
   font-size: 0.7rem;
   padding: 2px 10px;
+  text-decoration: none;
   white-space: nowrap;
 }
 
@@ -492,4 +493,21 @@ dl.meta dd {
   dl.meta dd {
     margin-bottom: 6px;
   }
+}
+
+summary.fold {
+  color: var(--va-navy);
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+details[open] > summary.fold {
+  margin-bottom: 14px;
+}
+
+summary:focus-visible {
+  outline: 3px solid var(--va-turquoise);
+  outline-offset: 2px;
 }

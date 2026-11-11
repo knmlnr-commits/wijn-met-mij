@@ -36,6 +36,11 @@ for behaviour only, never port its code.
 - `lib/complaints/`: view models (timeline per complaint, KPIs, filters, risk sort) and the
   action policy (`availableActions`: which actions are possible and why not). Server actions
   call `assertActionAllowed` before any write.
+- `lib/complaints/next-step.ts`: the single next step per complaint (dashboard column and the
+  banner on the complaint page). `lib/help.ts`: the in-app explanation per screen and the
+  process shown on `/guide`; update it when a screen changes.
+- `lib/changelog.ts`: `APP_VERSION` and the release notes on `/changelog`. For every user
+  visible change add an entry and keep `package.json` version equal (a test checks).
 - `lib/reports/`: DISP 1.10 MI and CSV (formula injection safe).
 - `lib/letters/`: the four letter templates (pure), referral wording from firm settings (FOS;
   Lloyd's then FOS for Lloyd's insurers). Missing wording renders as a `[[ ]]` placeholder and

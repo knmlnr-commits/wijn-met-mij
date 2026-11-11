@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { requirePageUser } from "@/lib/auth/session";
+import { SubNav } from "./SubNav";
 
 export const metadata: Metadata = { title: "Settings | Van Ameyde Complaints Management" };
 
@@ -19,13 +19,7 @@ export default async function SettingsLayout({ children }: { children: React.Rea
       <div className="page-header">
         <h1>Settings</h1>
       </div>
-      <nav aria-label="Settings sections" className="button-row">
-        {SECTIONS.map((s) => (
-          <Link key={s.href} href={s.href} className="button-secondary">
-            {s.label}
-          </Link>
-        ))}
-      </nav>
+      <SubNav sections={SECTIONS} />
       {children}
     </div>
   );

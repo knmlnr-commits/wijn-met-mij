@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { HelpPanel } from "@/components/HelpPanel";
 import { Nav, type NavLinkItem } from "@/components/Nav";
 import { can, ROLE_LABELS } from "@/lib/auth/roles";
 import type { Role } from "@/lib/domain/complaint";
 import { getSessionState } from "@/lib/auth/session";
+import { APP_VERSION } from "@/lib/changelog";
 import { appVersion } from "@/lib/version";
 import "./globals.css";
 
@@ -21,6 +23,7 @@ function linksFor(role: Role): NavLinkItem[] {
     { href: "/reports", label: "Reports" },
     ...(can.manage(role) ? [{ href: "/settings", label: "Settings" }] : []),
     { href: "/framework", label: "Framework" },
+    { href: "/guide", label: "How it works" },
   ];
 }
 
@@ -41,9 +44,15 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             </div>
           </div>
           <div className="header-right">
-            <span className="version-chip" title="Build version and environment">
-              {sha} · {env}
-            </span>
+            {user ? (
+              <Link href="/changelog" className="version-chip" title="Build version and environment; select to see what is new">
+                v{APP_VERSION} · {sha} · {env}
+              </Link>
+            ) : (
+              <span className="version-chip" title="Build version and environment">
+                v{APP_VERSION} · {sha} · {env}
+              </span>
+            )}
             {session.kind !== "anonymous" && (
               <div className="user-box">
                 {user && (

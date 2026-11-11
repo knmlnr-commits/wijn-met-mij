@@ -14,6 +14,13 @@
   flex-direction: column;
   gap: 2px;
   padding: 14px 16px;
+  text-decoration: none;
+}
+
+.tile:hover,
+.tile:focus-visible {
+  border-color: var(--va-navy);
+  outline: none;
 }
 
 .tile.alert {
@@ -32,17 +39,103 @@
   font-size: 0.8rem;
 }
 
+.toolbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tabs a,
+.toggle {
+  background: var(--va-white);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--va-navy);
+  padding: 7px 14px;
+  text-decoration: none;
+}
+
+.tabs a.activeTab,
+.toggleOn {
+  background: var(--va-navy);
+  border-color: var(--va-navy);
+  color: var(--va-white);
+}
+
+.tabs a:focus-visible,
+.toggle:focus-visible {
+  outline: 3px solid var(--va-turquoise);
+  outline-offset: 1px;
+}
+
+.count {
+  background: var(--grey-100);
+  border-radius: 999px;
+  color: var(--grey-900);
+  font-size: 0.75rem;
+  margin-left: 4px;
+  padding: 1px 8px;
+}
+
 .filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+}
+
+.filters summary {
+  color: var(--va-navy);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.searchRow {
+  align-items: flex-end;
+  display: flex;
+  gap: 8px;
+}
+
+.searchRow > :first-child {
+  flex: 1;
+}
+
+.filterGrid {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  padding: 16px;
+  margin-top: 10px;
 }
 
 .filterButtons {
   align-items: flex-end;
   display: flex;
-  gap: 8px;
+}
+
+.list td {
+  white-space: normal;
+}
+
+.ref {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.step {
+  min-width: 240px;
+}
+
+.urgent {
+  color: var(--rag-red);
+  font-weight: 700;
 }
 
 @media (max-width: 900px) {
@@ -50,8 +143,12 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .filters {
+  .filterGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wide {
+    display: none;
   }
 }
 
@@ -60,16 +157,21 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .filters {
+  .filterGrid {
     grid-template-columns: 1fr;
   }
 
-  .filterButtons {
+  .searchRow {
+    align-items: stretch;
     flex-direction: column;
   }
 
-  .filterButtons > * {
-    text-align: center;
-    width: 100%;
+  .step {
+    min-width: 150px;
+  }
+
+  .list th,
+  .list td {
+    padding: 8px;
   }
 }

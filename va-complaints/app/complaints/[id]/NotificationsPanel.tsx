@@ -37,7 +37,7 @@ function DraftEditor({ n, canWrite }: { n: NotificationRow; canWrite: boolean })
       </div>
       <div className="field">
         <label htmlFor={`content-${n.id}`}>Content (first line is the email subject)</label>
-        <textarea id={`content-${n.id}`} name="content" className={styles.letter} defaultValue={n.rendered_content} readOnly={!canWrite} />
+        <textarea id={`content-${n.id}`} name="content" className={styles.letter} rows={18} defaultValue={n.rendered_content} readOnly={!canWrite} />
       </div>
       {blocked && (
         <p className="notice notice-warn small">
@@ -64,7 +64,7 @@ export function NotificationsPanel({ complaintId, notifications, canWrite }: { c
   const [createResult, create, creating] = useActionState(createNotificationAction, IDLE);
 
   return (
-    <section className="card stack" aria-labelledby="notifications-heading">
+    <section className="card stack" aria-labelledby="notifications-heading" id="notifications">
       <h2 id="notifications-heading">Notifications</h2>
       <p className="small muted">
         Recording an acknowledgement, holding response, summary resolution or final response creates a letter draft here. Review and edit it, then

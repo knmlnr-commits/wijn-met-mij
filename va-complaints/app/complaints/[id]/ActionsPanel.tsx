@@ -29,6 +29,8 @@ interface Props {
   actions: ActionAvailability[];
   firmShortName: string;
   holdingRequiresFosRights: boolean;
+  /** The action the next step points to; opened and marked. */
+  recommended: ActionKey | null;
 }
 
 function ActionForm({ complaintId, action, submit, children }: { complaintId: string; action: Action; submit: string; children?: React.ReactNode }) {
@@ -38,6 +40,11 @@ function ActionForm({ complaintId, action, submit, children }: { complaintId: st
       <input type="hidden" name="complaintId" value={complaintId} />
       {children}
       <FormMessage result={result} />
+      {result.ok && result.message.includes("letter draft") && (
+        <a href="#notifications" className="button-secondary">
+          Review the letter
+        </a>
+      )}
       {result.fieldErrors && (
         <ul className="field-error">
           {Object.values(result.fieldErrors).map((m) => (
@@ -51,7 +58,7 @@ function ActionForm({ complaintId, action, submit, children }: { complaintId: st
 }
 
 /** The full action set; disabled actions show why. Every action is audited server side. */
-export function ActionsPanel({ complaintId, today, actions, firmShortName, holdingRequiresFosRights }: Props) {
+export function ActionsPanel({ complaintId, today, actions, firmShortName, holdingRequiresFosRights, recommended }: Props) {
   const none = IDLE;
   const date = (label: string) => <TextField name="date" label={label} type="date" result={none} required defaultValue={today} max={today} />;
   const parties = [
@@ -150,28 +157,48 @@ export function ActionsPanel({ complaintId, today, actions, firmShortName, holdi
     ),
   };
 
+  const usable = actions.filter((a) => a.key !== "edit" && a.key !== "delete" && a.enabled);
+  const blocked = actions.filter((a) => a.key !== "edit" && a.key !== "delete" && !a.enabled);
+  const remove = actions.find((a) => a.key === "delete");
+  // The recommended action first, so the next step is always at the top.
+  usable.sort((a, b) => Number(b.key === recommended) - Number(a.key === recommended));
+
   return (
-    <section className={styles.actions} aria-label="Actions">
+    <section className={styles.actions} aria-label="Actions" id="actions">
       <h2>Actions</h2>
+      {usable.length === 0 && <p className="muted small">No actions are available on this complaint right now.</p>}
       <ul className={styles.actionList}>
-        {actions
-          .filter((a) => a.key !== "edit")
-          .map((a) => (
-            <li key={a.key}>
-              {a.enabled ? (
-                <details className={styles.action}>
-                  <summary>{a.label}</summary>
-                  {forms[a.key]}
-                </details>
-              ) : (
-                <div className={`${styles.action} ${styles.disabled}`} aria-disabled="true">
-                  <span className={styles.actionLabel}>{a.label}</span>
-                  <span className={styles.reason}>{a.reason}</span>
-                </div>
-              )}
-            </li>
-          ))}
+        {usable.map((a) => (
+          <li key={a.key}>
+            <details className={`${styles.action} ${a.key === recommended ? styles.recommended : ""}`} open={a.key === recommended}>
+              <summary>
+                {a.label}
+                {a.key === recommended && <span className={styles.nextBadge}>Next step</span>}
+              </summary>
+              {forms[a.key]}
+            </details>
+          </li>
+        ))}
       </ul>
+      {blocked.length > 0 && (
+        <details className={styles.blocked}>
+          <summary>Not available yet ({blocked.length})</summary>
+          <ul className={styles.actionList}>
+            {blocked.map((a) => (
+              <li key={a.key} className={`${styles.action} ${styles.disabled}`}>
+                <span className={styles.actionLabel}>{a.label}</span>
+                <span className={styles.reason}>{a.reason}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+      {remove?.enabled && (
+        <details className={styles.blocked}>
+          <summary>Delete this complaint</summary>
+          {forms.delete}
+        </details>
+      )}
     </section>
   );
 }

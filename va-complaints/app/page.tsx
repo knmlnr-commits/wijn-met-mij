@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Rag } from "@/components/Rag";
 import { can } from "@/lib/auth/roles";
 import { requirePageUser } from "@/lib/auth/session";
-import { buildView, type DashboardFilters, filterViews, kpis, sortByRisk } from "@/lib/complaints/view";
+import { nextStep } from "@/lib/complaints/next-step";
+import { buildView, type ComplaintView, type DashboardFilters, filterViews, isOpen, kpis, sortByRisk } from "@/lib/complaints/view";
 import { createUserClient } from "@/lib/db/client";
 import { listComplaints } from "@/lib/db/complaints";
 import { loadContext } from "@/lib/db/context";
@@ -12,6 +13,33 @@ import { type Rag as RagValue, todayUtc } from "@/lib/rules";
 import styles from "./dashboard.module.css";
 
 type Search = Record<string, string | string[] | undefined>;
+
+const VIEWS = ["attention", "open", "due", "done", "all"] as const;
+type View = (typeof VIEWS)[number];
+
+const VIEW_LABELS: Record<View, string> = {
+  attention: "Needs attention",
+  open: "Open",
+  due: "Due within 7 days",
+  done: "Resolved and closed",
+  all: "All",
+};
+
+function inView(v: ComplaintView, view: View): boolean {
+  const c = v.complaint;
+  switch (view) {
+    case "attention":
+      return c.status !== "closed" && v.timeline.rag !== "green";
+    case "open":
+      return isOpen(c);
+    case "due":
+      return isOpen(c) && v.timeline.daysToDeadline >= 0 && v.timeline.daysToDeadline <= 7;
+    case "done":
+      return !isOpen(c);
+    case "all":
+      return true;
+  }
+}
 
 function one(value: string | string[] | undefined): string | undefined {
   const v = Array.isArray(value) ? value[0] : value;
@@ -33,17 +61,31 @@ function parseFilters(s: Search): DashboardFilters {
   };
 }
 
+function deadlineText(v: ComplaintView): string {
+  const t = v.timeline;
+  if (t.summaryResolved || t.finalResponseSent) return t.finalResponseLate ? "Answered late" : "Answered in time";
+  if (t.daysToDeadline < 0) return `${-t.daysToDeadline} days over`;
+  if (t.daysToDeadline === 0) return "Due today";
+  return `${t.daysToDeadline} days left`;
+}
+
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<Search> }) {
   const user = await requirePageUser();
   const params = await searchParams;
   const filters = parseFilters(params);
+  const requested = one(params.view) as View | undefined;
+  const view: View = requested && VIEWS.includes(requested) ? requested : "open";
+  const mine = one(params.mine) === "1";
   const db = await createUserClient();
   const [ctx, complaints] = await Promise.all([loadContext(db), listComplaints(db)]);
   const today = todayUtc();
   const all = complaints.map((c) => buildView(c, ctx, today));
-  const shown = sortByRisk(filterViews(all, filters));
-  const k = kpis(all);
-  const filtered = Object.values(filters).some((v) => v !== undefined);
+  const scoped = mine ? all.filter((v) => v.complaint.handler_id === user.id) : all;
+  const shown = sortByRisk(filterViews(scoped.filter((v) => inView(v, view)), filters));
+  const k = kpis(scoped);
+  const moreFilters = [filters.status, filters.insurerId, filters.handlerId, filters.rag, filters.product, filters.vulnerable].some((v) => v !== undefined);
+  const filtered = moreFilters || filters.search !== undefined;
+  const href = (v: View, extra = "") => `/?view=${v}${mine ? "&mine=1" : ""}${extra}`;
 
   return (
     <div className="stack">
@@ -57,81 +99,115 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       </div>
 
       <section className={styles.tiles} aria-label="Key figures">
-        <Tile label="Open" value={k.open} />
-        <Tile label="Breaching or overdue" value={k.breaching} tone={k.breaching > 0 ? "alert" : undefined} />
-        <Tile label="Due within 7 days" value={k.dueWithin7Days} />
-        <Tile label="Resolved or closed" value={k.resolvedOrClosed} />
-        <Tile label="Upheld rate" value={formatPercent(k.upheldRate)} />
+        <Tile label="Open" value={k.open} href={href("open")} />
+        <Tile label="Breaching or overdue" value={k.breaching} tone={k.breaching > 0 ? "alert" : undefined} href={href("all", "&rag=red")} />
+        <Tile label="Due within 7 days" value={k.dueWithin7Days} href={href("due")} />
+        <Tile label="Resolved or closed" value={k.resolvedOrClosed} href={href("done")} />
+        <Tile label="Upheld rate" value={formatPercent(k.upheldRate)} href="/reports" />
       </section>
 
+      <div className={styles.toolbar}>
+        <nav className={styles.tabs} aria-label="Views">
+          {(["attention", "open", "done", "all"] as const).map((v) => (
+            <Link key={v} href={href(v)} className={view === v ? styles.activeTab : undefined} aria-current={view === v ? "page" : undefined}>
+              {VIEW_LABELS[v]} <span className={styles.count}>{scoped.filter((x) => inView(x, v)).length}</span>
+            </Link>
+          ))}
+        </nav>
+        <Link href={`/?view=${view}${mine ? "" : "&mine=1"}`} className={`${styles.toggle} ${mine ? styles.toggleOn : ""}`} aria-pressed={mine}>
+          {mine ? "Showing my complaints" : "Show only my complaints"}
+        </Link>
+      </div>
+
       <form className={`card ${styles.filters}`} method="get" role="search" aria-label="Filter complaints">
-        <div className="field">
-          <label htmlFor="q">Search</label>
-          <input id="q" name="q" type="search" defaultValue={filters.search ?? ""} placeholder="Reference, name or claim reference" />
-        </div>
-        <Select name="status" label="Status" value={filters.status} options={STATUSES.map((s) => [s, STATUS_LABELS[s]])} />
-        <Select name="insurer" label="Complaint type" value={filters.insurerId} options={ctx.insurers.map((i) => [i.id, i.name])} />
-        <Select name="handler" label="Handler" value={filters.handlerId} options={ctx.profiles.filter((p) => p.role !== "compliance").map((p) => [p.id, p.display_name])} />
-        <Select name="rag" label="RAG" value={filters.rag} options={[["red", "Red"], ["amber", "Amber"], ["green", "Green"]]} />
-        <Select name="product" label="Product" value={filters.product} options={ctx.refs.ref_product.map((r) => [r.code, r.label])} />
-        <Select name="vulnerable" label="Vulnerable" value={filters.vulnerable === undefined ? undefined : filters.vulnerable ? "yes" : "no"} options={[["yes", "Yes"], ["no", "No"]]} />
-        <div className={styles.filterButtons}>
+        <input type="hidden" name="view" value={view} />
+        {mine && <input type="hidden" name="mine" value="1" />}
+        <div className={styles.searchRow}>
+          <div className="field">
+            <label htmlFor="q">Search</label>
+            <input id="q" name="q" type="search" defaultValue={filters.search ?? ""} placeholder="Reference, name or claim reference" />
+          </div>
           <button type="submit" className="button-primary">
-            Apply
+            Search
           </button>
           {filtered && (
-            <Link href="/" className="button-secondary">
+            <Link href={href(view)} className="button-secondary">
               Clear
             </Link>
           )}
         </div>
+        <details open={moreFilters}>
+          <summary>More filters</summary>
+          <div className={styles.filterGrid}>
+            <Select name="status" label="Status" value={filters.status} options={STATUSES.map((s) => [s, STATUS_LABELS[s]])} />
+            <Select name="insurer" label="Complaint type" value={filters.insurerId} options={ctx.insurers.map((i) => [i.id, i.name])} />
+            <Select name="handler" label="Handler" value={filters.handlerId} options={ctx.profiles.filter((p) => p.role !== "compliance").map((p) => [p.id, p.display_name])} />
+            <Select name="rag" label="RAG" value={filters.rag} options={[["red", "Red"], ["amber", "Amber"], ["green", "Green"]]} />
+            {ctx.refs.ref_product.length > 0 && <Select name="product" label="Product" value={filters.product} options={ctx.refs.ref_product.map((r) => [r.code, r.label])} />}
+            <Select name="vulnerable" label="Vulnerable" value={filters.vulnerable === undefined ? undefined : filters.vulnerable ? "yes" : "no"} options={[["yes", "Yes"], ["no", "No"]]} />
+            <div className={styles.filterButtons}>
+              <button type="submit" className="button-secondary">
+                Apply filters
+              </button>
+            </div>
+          </div>
+        </details>
       </form>
 
       <p className="muted small">
-        {shown.length} of {all.length} complaints, most at risk first.
+        {VIEW_LABELS[view]}: {shown.length} {shown.length === 1 ? "complaint" : "complaints"}, most at risk first.
       </p>
 
       <div className="table-wrap">
-        <table className="data">
+        <table className={`data ${styles.list}`}>
           <thead>
             <tr>
-              <th scope="col">Reference</th>
+              <th scope="col">Complaint</th>
               <th scope="col">RAG</th>
-              <th scope="col">Status</th>
-              <th scope="col">Complainant</th>
-              <th scope="col">Complaint type</th>
-              <th scope="col">Handler</th>
-              <th scope="col">Received</th>
-              <th scope="col">Final response due</th>
-              <th scope="col">Days left</th>
+              <th scope="col">Next step</th>
+              <th scope="col" className={styles.wide}>Complaint type</th>
+              <th scope="col" className={styles.wide}>Handler</th>
+              <th scope="col" className={styles.wide}>Received</th>
+              <th scope="col">Deadline</th>
             </tr>
           </thead>
           <tbody>
             {shown.length === 0 && (
               <tr>
-                <td colSpan={9} className="muted">
-                  {all.length === 0 ? "No complaints registered yet." : "No complaints match these filters."}
+                <td colSpan={7} className="muted">
+                  {all.length === 0 ? "No complaints registered yet." : view === "attention" && !filtered ? "Nothing needs attention right now." : "No complaints match this view."}
                 </td>
               </tr>
             )}
-            {shown.map(({ complaint: c, timeline: t, insurerName, handlerName }) => (
-              <tr key={c.id}>
-                <td>
-                  <Link href={`/complaints/${c.id}`}>{c.reference}</Link>
-                  {c.vulnerable_customer && <span className="badge badge-rose"> Vulnerable</span>}
-                </td>
-                <td>
-                  <Rag value={t.rag} />
-                </td>
-                <td>{STATUS_LABELS[c.status]}</td>
-                <td>{c.complainant_name}</td>
-                <td>{insurerName}</td>
-                <td>{handlerName}</td>
-                <td>{formatDate(c.received_date)}</td>
-                <td>{formatDate(t.finalResponseDeadline)}</td>
-                <td className="num">{t.finalResponseSent || t.summaryResolved ? "Resolved" : t.daysToDeadline}</td>
-              </tr>
-            ))}
+            {shown.map((v) => {
+              const { complaint: c, timeline: t } = v;
+              const step = nextStep(c, t);
+              return (
+                <tr key={c.id}>
+                  <td>
+                    <Link href={`/complaints/${c.id}`} className={styles.ref}>
+                      {c.reference}
+                    </Link>
+                    <div className="small">{c.complainant_name}</div>
+                    {c.vulnerable_customer && <span className="badge badge-rose">Vulnerable</span>}
+                  </td>
+                  <td>
+                    <Rag value={t.rag} />
+                  </td>
+                  <td className={styles.step}>
+                    <span className={step.tone === "urgent" ? styles.urgent : undefined}>{step.title}</span>
+                    <div className="small muted">{STATUS_LABELS[c.status]}</div>
+                  </td>
+                  <td className={styles.wide}>{v.insurerName}</td>
+                  <td className={styles.wide}>{v.handlerName}</td>
+                  <td className={styles.wide}>{formatDate(c.received_date)}</td>
+                  <td>
+                    {formatDate(t.finalResponseDeadline)}
+                    <div className="small muted">{deadlineText(v)}</div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -139,12 +215,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   );
 }
 
-function Tile({ label, value, tone }: { label: string; value: number | string; tone?: "alert" }) {
+function Tile({ label, value, tone, href }: { label: string; value: number | string; tone?: "alert"; href: string }) {
   return (
-    <div className={`${styles.tile} ${tone === "alert" ? styles.alert : ""}`}>
+    <Link href={href} className={`${styles.tile} ${tone === "alert" ? styles.alert : ""}`}>
       <span className={styles.value}>{value}</span>
       <span className={styles.label}>{label}</span>
-    </div>
+    </Link>
   );
 }
 
