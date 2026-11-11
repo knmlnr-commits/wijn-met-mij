@@ -12,7 +12,12 @@ test("handler registers, acknowledges and answers a complaint, then exports the 
 
   await page.goto("/login");
   await page.getByRole("button", { name: "Handler", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+  try {
+    await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible({ timeout: 20_000 });
+  } catch {
+    // Say what the page showed instead, so a failure in CI can be diagnosed from the log.
+    throw new Error(`Dashboard not reached after dev login. URL: ${page.url()}\nPage text:\n${(await page.locator("body").innerText()).slice(0, 1500)}`);
+  }
 
   await page.goto("/register");
   await page.getByLabel("Complaint type (required)").selectOption({ label: "Zurich" });

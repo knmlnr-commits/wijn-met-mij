@@ -6,6 +6,7 @@ export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
   retries: process.env.CI ? 1 : 0,
+  timeout: 90_000,
   use: {
     baseURL: `http://localhost:${port}`,
     trace: "retain-on-failure",
@@ -27,6 +28,9 @@ export default defineConfig({
     url: `http://localhost:${port}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    // Show the server's output in CI so a server side error is visible in the job log.
+    stdout: process.env.CI ? "pipe" : "ignore",
+    stderr: "pipe",
     // Without a Supabase project the smoke covers routing, the login page and the health check.
     // With E2E_FULL=1 and a seeded Supabase (see the e2e job in CI) flow.spec.ts runs the main flow.
     env: {
